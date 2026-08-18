@@ -220,13 +220,13 @@
             </div>
 
             <!-- Agenda Info Box -->
-            <div class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
+            <div id="cloud-notice-box" class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
                 <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-white shrink-0 mt-0.5">
-                    <i class="fa-solid fa-calendar-check text-lg text-white"></i>
+                    <i id="cloud-notice-icon" class="fa-solid fa-cloud text-lg text-amber-400"></i>
                 </div>
                 <div class="text-xs text-gray-300 leading-relaxed">
-                    <strong class="text-amber-400 font-semibold block text-sm mb-0.5">Gestión Directa de Citas</strong>
-                    Todas las reservas realizadas por los clientes se registran automáticamente en esta agenda. Con Firebase activo se sincronizan al instante en todos tus dispositivos.
+                    <strong id="cloud-notice-title" class="text-amber-400 font-semibold block text-sm mb-0.5">Gestión Directa de Citas</strong>
+                    <span id="cloud-notice-text">Todas las reservas realizadas por los clientes se registran automáticamente en esta agenda.</span>
                 </div>
             </div>
 
@@ -341,9 +341,16 @@
         </div>
     </div>
 
-    <!-- CONFIGURACIÓN DE FIREBASE (OPCIONAL) -->
+    <!-- CONFIGURACIÓN DE FIREBASE (ACTIVADA) -->
     <script>
-        const customFirebaseConfig = null; 
+        const customFirebaseConfig = {
+            apiKey: "AIzaSyCRop035RSLpoAbecHS1VWkRdubY3d6XHY",
+            authDomain: "gravity-salon-a4c07.firebaseapp.com",
+            projectId: "gravity-salon-a4c07",
+            storageBucket: "gravity-salon-a4c07.firebasestorage.app",
+            messagingSenderId: "170531909704",
+            appId: "1:170531909704:web:4a75a23f07ccca8418287d"
+        };
     </script>
 
     <!-- FIREBASE SERVICES & LOGIC INTEGRATION -->
@@ -382,6 +389,15 @@
                 const cloudBadge = document.getElementById('cloud-badge');
                 if (cloudBadge) cloudBadge.classList.remove('hidden');
 
+                const cloudNoticeBox = document.getElementById('cloud-notice-box');
+                if (cloudNoticeBox) {
+                    cloudNoticeBox.className = "bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-2xl flex items-start space-x-3";
+                    document.getElementById('cloud-notice-title').className = "text-emerald-400 font-semibold block text-sm mb-0.5";
+                    document.getElementById('cloud-notice-title').innerText = "Nube Conectada y Sincronizada";
+                    document.getElementById('cloud-notice-icon').className = "fa-solid fa-cloud-check text-lg text-emerald-400";
+                    document.getElementById('cloud-notice-text').innerText = "Las citas creadas en el móvil o en el ordenador se sincronizan al instante en tiempo real.";
+                }
+
                 const appointmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
                 onSnapshot(appointmentsRef, (snapshot) => {
                     const cloudAppointments = [];
@@ -400,6 +416,14 @@
             }
         } catch (err) {
             console.log("Modo de sesión local activo:", err);
+            const cloudNoticeBox = document.getElementById('cloud-notice-box');
+            if (cloudNoticeBox) {
+                cloudNoticeBox.className = "bg-amber-950/40 border border-amber-500/40 p-4 rounded-2xl flex items-start space-x-3";
+                document.getElementById('cloud-notice-title').className = "text-amber-400 font-semibold block text-sm mb-0.5";
+                document.getElementById('cloud-notice-title').innerText = "Modo Local (Sin sincronización entre dispositivos)";
+                document.getElementById('cloud-notice-icon').className = "fa-solid fa-triangle-exclamation text-lg text-amber-400";
+                document.getElementById('cloud-notice-text').innerText = "Las citas se están guardando solo en el almacenamiento de este dispositivo. Para ver las citas del móvil en tu ordenador en tiempo real, configura 'customFirebaseConfig' con tus claves de Firebase.";
+            }
         }
 
         window.saveAppointmentToCloud = async function(appointment) {
