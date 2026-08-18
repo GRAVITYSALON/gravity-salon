@@ -70,7 +70,7 @@
             <div class="flex items-center space-x-2">
                 <div id="cloud-badge" class="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Nube Conectada</span>
+                    <span id="cloud-status-text">Nube Conectada</span>
                 </div>
 
                 <div class="flex items-center space-x-1 bg-darkbg p-1 rounded-xl border border-darkborder">
@@ -112,7 +112,7 @@
             <!-- Client Navigation Tabs -->
             <div class="flex bg-darkcard p-1 rounded-xl border border-darkborder text-sm">
                 <button id="tab-book" onclick="switchTab('book')" class="flex-1 py-2.5 rounded-lg font-semibold text-center transition bg-amber-500 text-white shadow">
-                    <i class="fa-solid fa-calendar-plus mr-1.5"></i> Reservar Cita
+                    <i class="fa-solid fa-calendar-plus text-white mr-1.5"></i> Reservar Cita
                 </button>
                 <button id="tab-my-appointments" onclick="switchTab('my-appointments')" class="flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white">
                     <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Mis Citas (<span id="my-citas-count">0</span>)
@@ -219,14 +219,14 @@
                 </div>
             </div>
 
-            <!-- WhatsApp Control Info Box -->
-            <div class="bg-emerald-950/40 border border-emerald-500/30 p-4 rounded-2xl flex items-start space-x-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
-                    <i class="fa-solid fa-calendar-check text-lg"></i>
+            <!-- Agenda Info Box -->
+            <div class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
+                <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <i class="fa-solid fa-calendar-check text-lg text-white"></i>
                 </div>
                 <div class="text-xs text-gray-300 leading-relaxed">
-                    <strong class="text-emerald-400 font-semibold block text-sm mb-0.5">Gestión Directa en la App Web</strong>
-                    Las citas quedan confirmadas automáticamente en la aplicación. Puedes usar la opción <span class="text-emerald-300 font-medium">Recordatorio</span> si deseas enviar un mensaje puntual a un cliente.
+                    <strong class="text-amber-400 font-semibold block text-sm mb-0.5">Gestión Directa de Citas</strong>
+                    Todas las reservas realizadas por los clientes se registran automáticamente en esta agenda. Con Firebase activo se sincronizan al instante en todos tus dispositivos.
                 </div>
             </div>
 
@@ -258,7 +258,7 @@
                     <i class="fa-solid fa-user-check"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Datos del Cliente</h3>
-                <p class="text-xs text-gray-400">Ingresa tus datos para vincular tus citas</p>
+                <p class="text-xs text-gray-400">Ingresa tus datos para realizar reservas</p>
             </div>
 
             <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3">
@@ -267,7 +267,7 @@
                     <input type="text" id="auth-name" required placeholder="Ej. Carlos Mendoza" class="w-full bg-darkbg border border-darkborder rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Teléfono Móvil (WhatsApp) *</label>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Teléfono Móvil *</label>
                     <div class="flex">
                         <span class="bg-darkbg border border-r-0 border-darkborder rounded-l-xl px-3 py-2.5 text-xs text-gray-400 flex items-center">+34</span>
                         <input type="tel" id="auth-phone" required placeholder="612345678" pattern="[0-9]{9}" class="w-full bg-darkbg border border-darkborder rounded-r-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
@@ -290,7 +290,7 @@
 
             <div class="space-y-1">
                 <h3 class="text-xl font-bold text-white">¡Reserva Confirmada!</h3>
-                <p class="text-xs text-gray-400">Tu cita ha sido guardada con éxito en la aplicación.</p>
+                <p class="text-xs text-gray-400">Tu cita ha sido agendada con éxito en el sistema de la barbería.</p>
             </div>
 
             <!-- Ticket details -->
@@ -324,9 +324,12 @@
                 </div>
             </div>
 
-            <button onclick="closeSuccessModalAndShowAppointments()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-amber-500/20">
-                Ver Mis Citas
-            </button>
+            <div class="space-y-2">
+                <button onclick="closeSuccessModalAndShowAppointments()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-500/25 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-calendar-check text-lg text-white"></i>
+                    <span>Entendido / Ver Mis Citas</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -338,27 +341,37 @@
         </div>
     </div>
 
+    <!-- CONFIGURACIÓN DE FIREBASE (OPCIONAL) -->
+    <script>
+        const customFirebaseConfig = null; 
+    </script>
+
     <!-- FIREBASE SERVICES & LOGIC INTEGRATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables provided by environment or default app ID
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'peluqueria-barberia-app';
         let db = null;
         let auth = null;
         let isCloudActive = false;
 
-        // Initialize Firebase if credentials exist
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gravity-barberia-app';
+
         try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
+            let activeConfig = null;
+
+            if (typeof customFirebaseConfig !== 'undefined' && customFirebaseConfig) {
+                activeConfig = customFirebaseConfig;
+            } else if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                activeConfig = JSON.parse(__firebase_config);
+            }
+
+            if (activeConfig) {
+                const app = initializeApp(activeConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Authenticate first before queries
                 const authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
                     ? signInWithCustomToken(auth, __initial_auth_token)
                     : signInAnonymously(auth);
@@ -366,11 +379,9 @@
                 await authPromise;
                 isCloudActive = true;
                 
-                // Show Cloud badge
                 const cloudBadge = document.getElementById('cloud-badge');
                 if (cloudBadge) cloudBadge.classList.remove('hidden');
 
-                // Subscribe to real-time appointments collection (RULE 1 Path)
                 const appointmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
                 onSnapshot(appointmentsRef, (snapshot) => {
                     const cloudAppointments = [];
@@ -378,28 +389,26 @@
                         cloudAppointments.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     
-                    if (cloudAppointments.length > 0 || isCloudActive) {
-                        window.appointments = cloudAppointments;
-                        window.renderMyAppointments();
-                        window.renderAdminAppointments();
-                        window.updateTimeSlots();
-                    }
+                    window.appointments = cloudAppointments;
+                    window.saveLocalBackup();
+                    window.renderMyAppointments();
+                    window.renderAdminAppointments();
+                    window.updateTimeSlots();
                 }, (error) => {
-                    console.warn("Firestore error fallback to local memory:", error);
+                    console.warn("Error en la conexión a la nube:", error);
                 });
             }
         } catch (err) {
-            console.log("Running in local session mode:", err);
+            console.log("Modo de sesión local activo:", err);
         }
 
-        // Global persistence helper
         window.saveAppointmentToCloud = async function(appointment) {
             if (isCloudActive && db) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'appointments', appointment.id);
                     await setDoc(docRef, appointment);
                 } catch (e) {
-                    console.error("Error saving appointment to cloud:", e);
+                    console.error("Error al guardar en la nube:", e);
                 }
             }
         };
@@ -410,7 +419,7 @@
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'appointments', aptId);
                     await deleteDoc(docRef);
                 } catch (e) {
-                    console.error("Error deleting appointment from cloud:", e);
+                    console.error("Error al eliminar de la nube:", e);
                 }
             }
         };
@@ -441,6 +450,7 @@
         let currentUser = null;
         let currentMode = 'client';
         let currentTab = 'book';
+        let lastCreatedAppointment = null;
         
         let bookingSelection = {
             serviceId: 's1',
@@ -449,19 +459,43 @@
             time: '11:00'
         };
 
-        // Appointments memory array
-        window.appointments = [
-            {
-                id: 'apt-101',
-                clientName: 'Juan Pérez',
-                clientPhone: '611223344',
-                serviceId: 's3',
-                barberId: 'b1',
-                date: getTodayFormatted(),
-                time: '10:00',
-                status: 'confirmed'
+        // Load appointments from LocalStorage if available
+        function loadLocalBackup() {
+            try {
+                const stored = localStorage.getItem('gravity_appointments');
+                if (stored) {
+                    window.appointments = JSON.parse(stored);
+                } else {
+                    window.appointments = [];
+                }
+            } catch (e) {
+                window.appointments = [];
             }
-        ];
+        }
+
+        window.saveLocalBackup = function() {
+            try {
+                localStorage.setItem('gravity_appointments', JSON.stringify(window.appointments));
+            } catch (e) {}
+        };
+
+        function loadSavedUser() {
+            try {
+                const savedUser = localStorage.getItem('gravity_user');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    updateUserUI();
+                }
+            } catch (e) {}
+        }
+
+        function saveUserLocally() {
+            try {
+                if (currentUser) {
+                    localStorage.setItem('gravity_user', JSON.stringify(currentUser));
+                }
+            } catch (e) {}
+        }
 
         function getTodayFormatted() {
             const today = new Date();
@@ -477,6 +511,9 @@
 
         // Initialize App on DOM Load
         document.addEventListener('DOMContentLoaded', () => {
+            loadLocalBackup();
+            loadSavedUser();
+
             document.getElementById('booking-date').value = bookingSelection.date;
             document.getElementById('booking-date').min = getTodayFormatted();
             document.getElementById('admin-date-filter').value = getTodayFormatted();
@@ -620,13 +657,14 @@
             };
 
             window.appointments.push(newAppointment);
+            window.saveLocalBackup();
 
-            // Save to Firebase Cloud if active
+            // Save to Cloud if Firebase configured
             if (window.saveAppointmentToCloud) {
                 window.saveAppointmentToCloud(newAppointment);
             }
 
-            // Show in-app modal instead of opening WhatsApp
+            lastCreatedAppointment = newAppointment;
             showSuccessModal(newAppointment, service, barber);
 
             renderMyAppointments();
@@ -648,7 +686,7 @@
         function closeSuccessModalAndShowAppointments() {
             document.getElementById('modal-booking-success').classList.add('hidden');
             switchTab('my-appointments');
-            showToast("¡Cita agendada correctamente!", "success");
+            showToast("¡Cita confirmada y registrada!", "success");
         }
 
         function renderMyAppointments() {
@@ -662,7 +700,7 @@
             if (myAppointments.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12 bg-darkcard border border-darkborder rounded-2xl px-4">
-                        <i class="fa-regular fa-calendar-xmark text-4xl text-gray-600 mb-3"></i>
+                        <i class="fa-regular fa-calendar-xmark text-4xl text-white mb-3"></i>
                         <h4 class="font-bold text-white text-base">No tienes citas pendientes</h4>
                         <p class="text-xs text-gray-400 mt-1 mb-4">Selecciona tu horario preferido y reserva en 1 paso</p>
                         <button onclick="switchTab('book')" class="bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl">
@@ -697,7 +735,7 @@
 
                         <div class="bg-darkbg p-3 rounded-xl flex items-center justify-between text-xs text-gray-300">
                             <div class="flex items-center space-x-2">
-                                <i class="fa-regular fa-calendar text-amber-400"></i>
+                                <i class="fa-regular fa-calendar text-white"></i>
                                 <span>${formatDateReadable(apt.date)}</span>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -718,9 +756,12 @@
 
         function cancelAppointment(aptId) {
             window.appointments = window.appointments.filter(a => a.id !== aptId);
+            window.saveLocalBackup();
+
             if (window.deleteAppointmentFromCloud) {
                 window.deleteAppointmentFromCloud(aptId);
             }
+
             showToast("Cita cancelada correctamente", "info");
             renderMyAppointments();
             renderAdminAppointments();
@@ -763,7 +804,7 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10 bg-darkcard border border-darkborder rounded-2xl">
-                        <i class="fa-solid fa-calendar-day text-3xl text-gray-600 mb-2"></i>
+                        <i class="fa-solid fa-calendar-day text-3xl text-white mb-2"></i>
                         <p class="text-xs font-medium text-gray-400">Sin citas agendadas para este filtro</p>
                     </div>
                 `;
@@ -792,15 +833,8 @@
                         </div>
 
                         <div class="flex items-center space-x-2 w-full sm:w-auto">
-                            <button onclick="triggerAdminWhatsAppReminder('${apt.id}', 'reminder')" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-600/20">
-                                <i class="fa-brands fa-whatsapp text-sm"></i>
-                                <span>Recordatorio</span>
-                            </button>
-                            <button onclick="triggerAdminWhatsAppReminder('${apt.id}', 'thankyou')" class="bg-darkbg hover:bg-gray-800 text-gray-300 border border-darkborder px-2.5 py-2 rounded-xl text-xs transition" title="Enviar Agradecimiento">
-                                <i class="fa-solid fa-heart text-amber-400"></i>
-                            </button>
-                            <button onclick="cancelAppointment('${apt.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded-xl text-xs transition" title="Eliminar Cita">
-                                <i class="fa-solid fa-trash"></i>
+                            <button onclick="cancelAppointment('${apt.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Eliminar Cita">
+                                <i class="fa-solid fa-trash mr-1"></i> Cancelar Cita
                             </button>
                         </div>
                     </div>
@@ -827,6 +861,7 @@
             }
 
             currentUser = { name, phone };
+            saveUserLocally();
 
             updateUserUI();
             closeAuthModal();
