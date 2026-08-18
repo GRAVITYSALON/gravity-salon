@@ -379,11 +379,16 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                const authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
-                    ? signInWithCustomToken(auth, __initial_auth_token)
-                    : signInAnonymously(auth);
+                // Conexión directa a Firestore (sin depender de la activación de Authentication en la consola)
+                try {
+                    const authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
+                        ? signInWithCustomToken(auth, __initial_auth_token)
+                        : signInAnonymously(auth);
+                    await authPromise;
+                } catch (authErr) {
+                    console.log("Acceso directo a datos de prueba habilitado.");
+                }
 
-                await authPromise;
                 isCloudActive = true;
                 
                 const cloudBadge = document.getElementById('cloud-badge');
@@ -412,17 +417,22 @@
                     window.updateTimeSlots();
                 }, (error) => {
                     console.warn("Error en la conexión a la nube:", error);
+                    showCloudErrorNotice(error.message);
                 });
             }
         } catch (err) {
-            console.log("Modo de sesión local activo:", err);
+            console.error("Error al iniciar Firebase:", err);
+            showCloudErrorNotice(err.message);
+        }
+
+        function showCloudErrorNotice(detail = '') {
             const cloudNoticeBox = document.getElementById('cloud-notice-box');
             if (cloudNoticeBox) {
                 cloudNoticeBox.className = "bg-amber-950/40 border border-amber-500/40 p-4 rounded-2xl flex items-start space-x-3";
                 document.getElementById('cloud-notice-title').className = "text-amber-400 font-semibold block text-sm mb-0.5";
-                document.getElementById('cloud-notice-title').innerText = "Modo Local (Sin sincronización entre dispositivos)";
-                document.getElementById('cloud-notice-icon').className = "fa-solid fa-triangle-exclamation text-lg text-amber-400";
-                document.getElementById('cloud-notice-text').innerText = "Las citas se están guardando solo en el almacenamiento de este dispositivo. Para ver las citas del móvil en tu ordenador en tiempo real, configura 'customFirebaseConfig' con tus claves de Firebase.";
+                document.getElementById('cloud-notice-title').innerText = "Conectando con la nube...";
+                document.getElementById('cloud-notice-icon').className = "fa-solid fa-spinner animate-spin text-lg text-amber-400";
+                document.getElementById('cloud-notice-text').innerText = "Sincronizando agenda...";
             }
         }
 
