@@ -238,12 +238,12 @@
                     </div>
                 </div>
 
-                <!-- Desglose de ganancias por profesional -->
+                <!-- Desglose de ganancias y total de citas por profesional -->
                 <div class="bg-darkcard border border-darkborder rounded-2xl p-4 space-y-3">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
-                        <i class="fa-solid fa-chart-pie mr-1.5 text-amber-500"></i> Rendimiento e Ingresos por Profesional (Hoy)
+                        <i class="fa-solid fa-chart-pie mr-1.5 text-amber-500"></i> Rendimiento y Total de Citas por Profesional
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="barber-revenue-breakdown">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="barber-revenue-breakdown">
                         <!-- Inyectado dinámicamente -->
                     </div>
                 </div>
@@ -515,6 +515,12 @@
             }
         } catch (err) {
             console.log("Modo de sesión local activo:", err);
+            window.appointments = window.appointments || [];
+            window.renderMyAppointments();
+            window.renderAdminAppointments();
+            window.renderClientsDirectory();
+            window.updateTimeSlots();
+
             const cloudNoticeBox = document.getElementById('cloud-notice-box');
             if (cloudNoticeBox) {
                 cloudNoticeBox.className = "bg-amber-950/40 border border-amber-500/40 p-4 rounded-2xl flex items-start space-x-3";
@@ -817,7 +823,7 @@
 
         function renderTodayQuickList() {
             const container = document.getElementById('today-quick-list');
-            const todayApts = window.appointments.filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
+            const todayApts = (window.appointments || []).filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
 
             if (todayApts.length === 0) {
                 container.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">No hay citas agendadas para hoy.</p>`;
@@ -839,6 +845,14 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Desplegable individual para el "Total de Citas" de cada peluquero
+        function toggleBarberAppointmentsDropdown(barberId) {
+            const listContainer = document.getElementById(`barber-list-${barberId}`);
+            if (listContainer) {
+                listContainer.classList.toggle('hidden');
+            }
         }
 
         // Renderizar rejilla para bloquear horas
@@ -927,7 +941,7 @@
 
         function renderMyAppointments() {
             const container = document.getElementById('my-appointments-list');
-            const myAppointments = currentUser 
+            const myAppointments = currentUser && window.appointments
                 ? window.appointments.filter(a => a.clientPhone === currentUser.phone && a.status !== 'blocked')
                 : [];
 
@@ -991,7 +1005,7 @@
         }
 
         function cancelAppointment(aptId) {
-            window.appointments = window.appointments.filter(a => a.id !== aptId);
+            window.appointments = (window.appointments || []).filter(a => a.id !== aptId);
             window.saveLocalBackup();
 
             if (window.deleteAppointmentFromCloud) {
@@ -1016,6 +1030,7 @@
         }
 
         function renderAdminAppointments() {
+            window.appointments = window.appointments || [];
             const dateFilter = document.getElementById('admin-date-filter').value;
             const barberFilter = document.getElementById('admin-barber-filter').value;
 
@@ -1034,8 +1049,8 @@
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
 
-            // Calcular y renderizar ganancias por profesional (hoy)
-            renderBarberRevenueBreakdown(todayAppointments);
+            // Calcular y renderizar ganancias y total de citas individuales por barbero
+            renderBarberRevenueBreakdown(dateFilter);
 
             const totalSlotsCount = TIME_SLOTS.length;
             const occupiedSlotsCount = todayAppointments.length;
@@ -1111,31 +1126,59 @@
             }).join('');
         }
 
-        // Función para calcular y renderizar ganancias individuales por barbero
-        function renderBarberRevenueBreakdown(todayApts) {
+        // Función para calcular ganancias y mostrar la sección individual de "Total Citas" por profesional para la fecha filtrada
+        function renderBarberRevenueBreakdown(selectedDate) {
             const container = document.getElementById('barber-revenue-breakdown');
             if (!container) return;
 
+            const dateApts = (window.appointments || []).filter(a => a.date === selectedDate && a.status !== 'blocked');
+
             const stats = {};
             BARBERS.forEach(b => {
-                stats[b.id] = { name: b.name, count: 0, revenue: 0 };
+                stats[b.id] = { name: b.name, appointments: [], revenue: 0 };
             });
 
-            todayApts.forEach(apt => {
+            dateApts.forEach(apt => {
                 if (stats[apt.barberId]) {
-                    stats[apt.barberId].count++;
+                    stats[apt.barberId].appointments.push(apt);
                     const s = SERVICES.find(srv => srv.id === apt.serviceId);
                     stats[apt.barberId].revenue += (s ? s.price : 0);
                 }
             });
 
             container.innerHTML = Object.values(stats).map(st => `
-                <div class="bg-darkbg border border-darkborder rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                        <h4 class="font-bold text-white text-xs">${st.name}</h4>
-                        <p class="text-[10px] text-gray-400">${st.count} servicio(s) hoy</p>
+                <div class="bg-darkbg border border-darkborder rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-white text-xs">${st.name}</h4>
+                            <p class="text-[10px] text-gray-400">Ingresos: <strong class="text-amber-400">${st.revenue}€</strong></p>
+                        </div>
+                        <button onclick="toggleBarberAppointmentsDropdown('${st.name}')" class="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition flex items-center space-x-1.5">
+                            <span>Total Citas (${st.appointments.length})</span>
+                            <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                        </button>
                     </div>
-                    <span class="text-sm font-bold text-amber-400">${st.revenue}€</span>
+
+                    <!-- Desplegable individual de citas para este peluquero -->
+                    <div id="barber-list-${st.name}" class="hidden space-y-1.5 pt-2 border-t border-darkborder max-h-48 overflow-y-auto no-scrollbar">
+                        ${st.appointments.length === 0 
+                            ? `<p class="text-[11px] text-gray-500 text-center py-1">Sin citas para este día</p>` 
+                            : st.appointments.map(apt => {
+                                const s = SERVICES.find(srv => srv.id === apt.serviceId) || { name: 'Servicio', price: 0 };
+                                return `
+                                    <div class="bg-darkcard p-2 rounded-lg text-[11px] flex justify-between items-center">
+                                        <div>
+                                            <span class="text-amber-400 font-bold">${apt.time} h</span> - <strong class="text-white">${apt.clientName}</strong>
+                                            <div class="text-[10px] text-gray-400">${s.name} (${s.price}€)</div>
+                                        </div>
+                                        <button onclick="sendWhatsAppMessage('${apt.clientPhone}', '${apt.clientName}', '${s.name}', '${apt.date}', '${apt.time}')" class="text-emerald-400 p-1">
+                                            <i class="fa-brands fa-whatsapp"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')
+                        }
+                    </div>
                 </div>
             `).join('');
         }
@@ -1146,7 +1189,7 @@
             const searchVal = document.getElementById('client-search-input') ? document.getElementById('client-search-input').value.toLowerCase() : '';
 
             const clientsMap = {};
-            window.appointments.filter(a => a.status !== 'blocked').forEach(apt => {
+            (window.appointments || []).filter(a => a.status !== 'blocked').forEach(apt => {
                 if (!clientsMap[apt.clientPhone]) {
                     clientsMap[apt.clientPhone] = {
                         name: apt.clientName,
