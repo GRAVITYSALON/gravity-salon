@@ -219,6 +219,43 @@
                 </div>
             </div>
 
+            <!-- NUEVO: Panel de Bloqueo de Horarios para Peluqueros -->
+            <div class="bg-darkcard border border-amber-500/20 rounded-2xl p-4 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                    <i class="fa-solid fa-ban mr-1.5 text-amber-500"></i> Bloquear Horario o Día Completo
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 mb-1">Fecha a bloquear</label>
+                        <input type="date" id="admin-block-date" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 mb-1">Hora específica o completo</label>
+                        <select id="admin-block-time" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                            <option value="ALL">Todo el día (Cerrado)</option>
+                            <option value="10:00">10:00 h</option>
+                            <option value="10:30">10:30 h</option>
+                            <option value="11:00">11:00 h</option>
+                            <option value="11:30">11:30 h</option>
+                            <option value="12:00">12:00 h</option>
+                            <option value="12:30">12:30 h</option>
+                            <option value="16:00">16:00 h</option>
+                            <option value="16:30">16:30 h</option>
+                            <option value="17:00">17:00 h</option>
+                            <option value="17:30">17:30 h</option>
+                            <option value="18:00">18:00 h</option>
+                            <option value="18:30">18:30 h</option>
+                            <option value="19:00">19:00 h</option>
+                            <option value="19:30">19:30 h</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="blockSchedule()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Bloquear en la Agenda</span>
+                </button>
+            </div>
+
             <!-- Agenda Info Box -->
             <div id="cloud-notice-box" class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
                 <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-white shrink-0 mt-0.5">
@@ -541,6 +578,7 @@
             document.getElementById('booking-date').value = bookingSelection.date;
             document.getElementById('booking-date').min = getTodayFormatted();
             document.getElementById('admin-date-filter').value = getTodayFormatted();
+            document.getElementById('admin-block-date').value = getTodayFormatted();
 
             renderServices();
             renderBarbers();
@@ -613,9 +651,10 @@
             const dateInput = document.getElementById('booking-date').value;
             bookingSelection.date = dateInput;
 
+            // Bloquea los slots si hay una cita normal o un bloqueo de día completo / hora específica
             const bookedTimes = window.appointments
-                .filter(a => a.date === dateInput && (a.barberId === bookingSelection.barberId || bookingSelection.barberId === 'b3'))
-                .map(a => a.time);
+                .filter(a => a.date === dateInput && (a.barberId === bookingSelection.barberId || bookingSelection.barberId === 'b3' || a.barberId === 'all'))
+                .flatMap(a => a.time === 'ALL' ? TIME_SLOTS : [a.time]);
 
             const container = document.getElementById('time-slots-container');
             container.innerHTML = TIME_SLOTS.map(slot => {
@@ -656,8 +695,8 @@
 
             const isTaken = window.appointments.some(a => 
                 a.date === bookingSelection.date && 
-                a.time === bookingSelection.time && 
-                a.barberId === bookingSelection.barberId
+                (a.time === bookingSelection.time || a.time === 'ALL') && 
+                (a.barberId === bookingSelection.barberId || bookingSelection.barberId === 'b3')
             );
 
             if (isTaken) {
@@ -691,10 +730,59 @@
             lastCreatedAppointment = newAppointment;
             showSuccessModal(newAppointment, service, barber);
 
+            // Enviar recordatorio opcional por WhatsApp
+            sendWhatsAppReminder(newAppointment);
+
             renderMyAppointments();
             renderAdminAppointments();
             updateTimeSlots();
         }
+
+        // Función para enviar recordatorio por WhatsApp de forma automática
+        function sendWhatsAppReminder(apt) {
+            const service = SERVICES.find(s => s.id === apt.serviceId) || { name: 'Servicio' };
+            const text = `Hola ${apt.clientName}, tu cita en Gravity Salón para ${service.name} el día ${formatDateReadable(apt.date)} a las ${apt.time} h ha sido confirmada. ¡Te esperamos!`;
+            const phone = apt.clientPhone.replace(/\s+/g, '');
+            // Abrir enlace de whatsapp
+            const waUrl = `https://wa.me/34${phone}?text=${encodeURIComponent(text)}`;
+            
+            // Opcional: Creamos un enlace flotante o se abre en segundo plano/pestaña nueva
+            console.log("WhatsApp URL generado:", waUrl);
+        }
+
+        // Función para que los peluqueros bloqueen horarios o días completos
+        window.blockSchedule = function() {
+            const date = document.getElementById('admin-block-date').value;
+            const time = document.getElementById('admin-block-time').value;
+            const barberId = document.getElementById('admin-barber-filter').value;
+
+            if (!date) {
+                showToast("Selecciona una fecha para bloquear", "error");
+                return;
+            }
+
+            const blockApt = {
+                id: 'blocked-' + Date.now(),
+                clientName: time === 'ALL' ? '🔒 DÍA COMPLETO CERRADO' : '🔒 HORARIO BLOQUEADO',
+                clientPhone: '000000000',
+                serviceId: 's1',
+                barberId: barberId === 'all' ? 'b1' : barberId,
+                date: date,
+                time: time,
+                status: 'blocked'
+            };
+
+            window.appointments.push(blockApt);
+            window.saveLocalBackup();
+
+            if (window.saveAppointmentToCloud) {
+                window.saveAppointmentToCloud(blockApt);
+            }
+
+            renderAdminAppointments();
+            updateTimeSlots();
+            showToast("Horario bloqueado correctamente", "success");
+        };
 
         function showSuccessModal(apt, service, barber) {
             document.getElementById('success-client-name').innerText = apt.clientName;
@@ -710,13 +798,22 @@
         function closeSuccessModalAndShowAppointments() {
             document.getElementById('modal-booking-success').classList.add('hidden');
             switchTab('my-appointments');
+            
+            // Abrir WhatsApp con el recordatorio al hacer clic si lo desean
+            if (lastCreatedAppointment) {
+                const service = SERVICES.find(s => s.id === lastCreatedAppointment.serviceId) || { name: 'Servicio' };
+                const text = `Hola ${lastCreatedAppointment.clientName}, tu cita en Gravity Salón para ${service.name} el día ${formatDateReadable(lastCreatedAppointment.date)} a las ${lastCreatedAppointment.time} h ha sido confirmada. ¡Te esperamos!`;
+                const phone = lastCreatedAppointment.clientPhone.replace(/\s+/g, '');
+                window.open(`https://wa.me/34${phone}?text=${encodeURIComponent(text)}`, '_blank');
+            }
+
             showToast("¡Cita confirmada y registrada!", "success");
         }
 
         function renderMyAppointments() {
             const container = document.getElementById('my-appointments-list');
             const myAppointments = currentUser 
-                ? window.appointments.filter(a => a.clientPhone === currentUser.phone)
+                ? window.appointments.filter(a => a.clientPhone === currentUser.phone && a.status !== 'blocked')
                 : [];
 
             document.getElementById('my-citas-count').innerText = myAppointments.length;
@@ -786,7 +883,7 @@
                 window.deleteAppointmentFromCloud(aptId);
             }
 
-            showToast("Cita cancelada correctamente", "info");
+            showToast("Registro eliminado correctamente", "info");
             renderMyAppointments();
             renderAdminAppointments();
             updateTimeSlots();
@@ -811,9 +908,9 @@
                 filtered = filtered.filter(a => a.barberId === barberFilter);
             }
 
-            const todayAppointments = window.appointments.filter(a => a.date === getTodayFormatted());
+            const todayAppointments = window.appointments.filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
             document.getElementById('stat-today-count').innerText = todayAppointments.length;
-            document.getElementById('stat-total-count').innerText = window.appointments.length;
+            document.getElementById('stat-total-count').innerText = window.appointments.filter(a => a.status !== 'blocked').length;
 
             const todayRevenue = todayAppointments.reduce((acc, apt) => {
                 const s = SERVICES.find(srv => srv.id === apt.serviceId);
@@ -821,7 +918,7 @@
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
 
-            document.getElementById('admin-agenda-subtitle').innerText = `${filtered.length} cita(s) para el ${formatDateReadable(dateFilter)}`;
+            document.getElementById('admin-agenda-subtitle').innerText = `${filtered.length} elemento(s) para el ${formatDateReadable(dateFilter)}`;
 
             const container = document.getElementById('admin-appointments-list');
 
@@ -829,13 +926,32 @@
                 container.innerHTML = `
                     <div class="text-center py-10 bg-darkcard border border-darkborder rounded-2xl">
                         <i class="fa-solid fa-calendar-day text-3xl text-white mb-2"></i>
-                        <p class="text-xs font-medium text-gray-400">Sin citas agendadas para este filtro</p>
+                        <p class="text-xs font-medium text-gray-400">Sin citas ni bloqueos para este filtro</p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = filtered.map(apt => {
+                if (apt.status === 'blocked') {
+                    return `
+                        <div class="bg-red-950/20 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-red-500/20 text-red-400 font-bold px-2.5 py-1 rounded-lg text-xs border border-red-500/30">
+                                        <i class="fa-solid fa-ban mr-1"></i> ${apt.time === 'ALL' ? 'Día Completo' : apt.time + ' h'}
+                                    </span>
+                                    <h4 class="font-bold text-red-300 text-sm">${apt.clientName}</h4>
+                                </div>
+                                <p class="text-xs text-gray-400">Bloqueo aplicado en la agenda del profesional.</p>
+                            </div>
+                            <button onclick="cancelAppointment('${apt.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition">
+                                <i class="fa-solid fa-lock-open mr-1"></i> Desbloquear
+                            </button>
+                        </div>
+                    `;
+                }
+
                 const service = SERVICES.find(s => s.id === apt.serviceId) || { name: 'Servicio', price: 0 };
                 const barber = BARBERS.find(b => b.id === apt.barberId) || { name: 'Peluquero' };
 
