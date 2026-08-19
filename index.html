@@ -205,7 +205,6 @@
             <div id="admin-subview-agenda" class="space-y-6">
                 <!-- Admin Stats Bar -->
                 <div class="grid grid-cols-3 gap-3">
-                    <!-- Botón desplegable interactivo para "Citas Hoy" -->
                     <div onclick="toggleTodayQuickDropdown()" class="bg-darkcard border border-darkborder p-3.5 rounded-2xl cursor-pointer hover:border-amber-500/50 transition relative">
                         <p class="text-[11px] text-gray-400 font-medium flex items-center justify-between">
                             <span>Citas Hoy</span>
@@ -644,10 +643,13 @@
             loadLocalBackup();
             loadSavedUser();
 
-            document.getElementById('booking-date').value = bookingSelection.date;
-            document.getElementById('booking-date').min = getTodayFormatted();
-            document.getElementById('admin-date-filter').value = getTodayFormatted();
-            document.getElementById('admin-block-date').value = getTodayFormatted();
+            const todayStr = getTodayFormatted();
+            const bookingDateEl = document.getElementById('booking-date');
+            bookingDateEl.value = todayStr;
+            bookingDateEl.min = todayStr; // BLOQUEAR DÍAS PASADOS EN EL CALENDARIO NATIVO
+
+            document.getElementById('admin-date-filter').value = todayStr;
+            document.getElementById('admin-block-date').value = todayStr;
 
             renderServices();
             renderBarbers();
@@ -722,16 +724,33 @@
             const dateInput = document.getElementById('booking-date').value;
             bookingSelection.date = dateInput;
 
-            const bookedTimes = window.appointments
+            const todayStr = getTodayFormatted();
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+            const bookedTimes = (window.appointments || [])
                 .filter(a => a.date === dateInput && (a.barberId === bookingSelection.barberId || bookingSelection.barberId === 'b3' || a.barberId === 'all'))
                 .flatMap(a => a.time === 'ALL' ? TIME_SLOTS : [a.time]);
 
             const container = document.getElementById('time-slots-container');
             container.innerHTML = TIME_SLOTS.map(slot => {
                 const isBooked = bookedTimes.includes(slot);
+                
+                // VALIDACIÓN DE TIEMPO REAL: Si es el día de hoy, bloquear horas pasadas
+                let isPastTime = false;
+                if (dateInput === todayStr) {
+                    const [slotHour, slotMinute] = slot.split(':').map(Number);
+                    const slotTotalMinutes = slotHour * 60 + slotMinute;
+                    if (slotTotalMinutes <= currentTotalMinutes) {
+                        isPastTime = true;
+                    }
+                }
+
                 const isSelected = bookingSelection.time === slot;
 
-                if (isBooked) {
+                if (isBooked || isPastTime) {
                     return `
                         <button disabled class="py-2.5 rounded-xl border border-darkborder bg-darkbg text-gray-600 text-xs font-semibold cursor-not-allowed line-through">
                             ${slot}
@@ -763,7 +782,20 @@
                 return;
             }
 
-            const isTaken = window.appointments.some(a => 
+            const todayStr = getTodayFormatted();
+            const now = new Date();
+            const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+
+            if (bookingSelection.date === todayStr) {
+                const [slotHour, slotMinute] = bookingSelection.time.split(':').map(Number);
+                if (slotHour * 60 + slotMinute <= currentTotalMinutes) {
+                    showToast("No puedes reservar una hora que ya ha pasado", "error");
+                    updateTimeSlots();
+                    return;
+                }
+            }
+
+            const isTaken = (window.appointments || []).some(a => 
                 a.date === bookingSelection.date && 
                 (a.time === bookingSelection.time || a.time === 'ALL') && 
                 (a.barberId === bookingSelection.barberId || bookingSelection.barberId === 'b3')
@@ -1041,7 +1073,6 @@
 
             const todayAppointments = window.appointments.filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
             document.getElementById('stat-today-count').innerText = todayAppointments.length;
-            document.getElementById('stat-total-count').innerText = window.appointments.filter(a => a.status !== 'blocked').length;
 
             const todayRevenue = todayAppointments.reduce((acc, apt) => {
                 const s = SERVICES.find(srv => srv.id === apt.serviceId);
@@ -1049,7 +1080,6 @@
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
 
-            // Calcular y renderizar ganancias y total de citas individuales por barbero
             renderBarberRevenueBreakdown(dateFilter);
 
             const totalSlotsCount = TIME_SLOTS.length;
@@ -1126,7 +1156,6 @@
             }).join('');
         }
 
-        // Función para calcular ganancias y mostrar la sección individual de "Total Citas" por profesional para la fecha filtrada
         function renderBarberRevenueBreakdown(selectedDate) {
             const container = document.getElementById('barber-revenue-breakdown');
             if (!container) return;
@@ -1159,7 +1188,6 @@
                         </button>
                     </div>
 
-                    <!-- Desplegable individual de citas para este peluquero -->
                     <div id="barber-list-${st.name}" class="hidden space-y-1.5 pt-2 border-t border-darkborder max-h-48 overflow-y-auto no-scrollbar">
                         ${st.appointments.length === 0 
                             ? `<p class="text-[11px] text-gray-500 text-center py-1">Sin citas para este día</p>` 
@@ -1183,7 +1211,6 @@
             `).join('');
         }
 
-        // Renderizar Directorio de Clientes (Clientes VIP)
         function renderClientsDirectory() {
             const container = document.getElementById('clients-directory-list');
             const searchVal = document.getElementById('client-search-input') ? document.getElementById('client-search-input').value.toLowerCase() : '';
