@@ -207,7 +207,7 @@
                 <div class="grid grid-cols-3 gap-3">
                     <div onclick="toggleTodayQuickDropdown()" class="bg-darkcard border border-darkborder p-3.5 rounded-2xl cursor-pointer hover:border-amber-500/50 transition relative">
                         <p class="text-[11px] text-gray-400 font-medium flex items-center justify-between">
-                            <span>Citas Hoy</span>
+                            <span>Citas Día</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-amber-400"></i>
                         </p>
                         <p class="text-xl font-bold text-white mt-0.5" id="stat-today-count">0</p>
@@ -226,10 +226,10 @@
                     </div>
                 </div>
 
-                <!-- Desplegable rápido de citas de hoy (oculto por defecto) -->
+                <!-- Desplegable rápido de citas (oculto por defecto) -->
                 <div id="today-quick-dropdown" class="hidden bg-darkcard border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-xl">
                     <div class="flex items-center justify-between border-b border-darkborder pb-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">⚡ Citas de Hoy (Vista Rápida)</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">⚡ Citas del Día Seleccionado</h4>
                         <button onclick="toggleTodayQuickDropdown()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div id="today-quick-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
@@ -646,7 +646,7 @@
             const todayStr = getTodayFormatted();
             const bookingDateEl = document.getElementById('booking-date');
             bookingDateEl.value = todayStr;
-            bookingDateEl.min = todayStr; // BLOQUEAR DÍAS PASADOS EN EL CALENDARIO NATIVO
+            bookingDateEl.min = todayStr;
 
             document.getElementById('admin-date-filter').value = todayStr;
             document.getElementById('admin-block-date').value = todayStr;
@@ -836,7 +836,6 @@
             updateTimeSlots();
         }
 
-        // WhatsApp recordatorio con datos reales de la cita
         window.sendWhatsAppMessage = function(phone, name, serviceName, dateStr, timeStr) {
             const cleanPhone = phone.replace(/\s+/g, '');
             const text = `📅 Hola ${name}, te recordamos tu cita en Gravity Salón para el servicio de *${serviceName}* el día *${formatDateReadable(dateStr)}* a las *${timeStr} h*. ¡Te esperamos!`;
@@ -853,14 +852,15 @@
 
         function renderTodayQuickList() {
             const container = document.getElementById('today-quick-list');
-            const todayApts = (window.appointments || []).filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
+            const dateFilter = document.getElementById('admin-date-filter').value;
+            const currentApts = (window.appointments || []).filter(a => a.date === dateFilter && a.status !== 'blocked');
 
-            if (todayApts.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">No hay citas agendadas para hoy.</p>`;
+            if (currentApts.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">No hay citas agendadas para este día.</p>`;
                 return;
             }
 
-            container.innerHTML = todayApts.map(apt => {
+            container.innerHTML = currentApts.map(apt => {
                 const s = SERVICES.find(srv => srv.id === apt.serviceId) || { name: 'Servicio', price: 0 };
                 const b = BARBERS.find(bar => bar.id === apt.barberId) || { name: 'Peluquero' };
                 return `
@@ -1057,33 +1057,47 @@
             });
         }
 
+        // Renderizado central optimizado para actualizar contadores según fecha seleccionada
         function renderAdminAppointments() {
             window.appointments = window.appointments || [];
             const dateFilter = document.getElementById('admin-date-filter').value;
             const barberFilter = document.getElementById('admin-barber-filter').value;
 
-            let filtered = window.appointments.filter(a => a.date === dateFilter);
-            if (barberFilter !== 'all') {
-                filtered = filtered.filter(a => a.barberId === barberFilter);
-            }
+            // Obtener citas activas para la fecha seleccionada en el filtro
+            const selectedDateAppointments = window.appointments.filter(a => a.date === dateFilter && a.status !== 'blocked');
 
-            const todayAppointments = window.appointments.filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
-            document.getElementById('stat-today-count').innerText = todayAppointments.length;
+            // Actualizar total de citas del día seleccionado
+            document.getElementById('stat-today-count').innerText = selectedDateAppointments.length;
 
-            const todayRevenue = todayAppointments.reduce((acc, apt) => {
+            // Actualizar caja estimada del día seleccionado
+            const revenue = selectedDateAppointments.reduce((acc, apt) => {
                 const s = SERVICES.find(srv => srv.id === apt.serviceId);
                 return acc + (s ? s.price : 0);
             }, 0);
-            document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
+            document.getElementById('stat-revenue').innerText = `${revenue}€`;
 
-            renderBarberRevenueBreakdown(dateFilter);
-
+            // Actualizar ocupación basada en los huecos de la jornada
             const totalSlotsCount = TIME_SLOTS.length;
-            const occupiedSlotsCount = todayAppointments.length;
+            const occupiedSlotsCount = selectedDateAppointments.length;
             const occupancyPct = Math.min(100, Math.round((occupiedSlotsCount / totalSlotsCount) * 100));
             document.getElementById('stat-occupancy').innerText = `${occupancyPct}%`;
             document.getElementById('occupancy-text').innerText = `${occupiedSlotsCount} / ${totalSlotsCount} huecos ocupados`;
             document.getElementById('occupancy-bar').style.width = `${occupancyPct}%`;
+
+            // Si el desplegable rápido está abierto, refrescarlo
+            const dropdown = document.getElementById('today-quick-dropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                renderTodayQuickList();
+            }
+
+            // Renderizar desglose por profesional
+            renderBarberRevenueBreakdown(dateFilter);
+
+            // Filtrar para la lista principal de la agenda
+            let filtered = window.appointments.filter(a => a.date === dateFilter);
+            if (barberFilter !== 'all') {
+                filtered = filtered.filter(a => a.barberId === barberFilter);
+            }
 
             document.getElementById('admin-agenda-subtitle').innerText = `${filtered.length} elemento(s) para el ${formatDateReadable(dateFilter)}`;
 
@@ -1152,7 +1166,6 @@
             }).join('');
         }
 
-        // Desglose corregido con llamada limpia a sendWhatsAppMessage usando datos de cada apt
         function renderBarberRevenueBreakdown(selectedDate) {
             const container = document.getElementById('barber-revenue-breakdown');
             if (!container) return;
