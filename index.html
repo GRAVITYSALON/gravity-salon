@@ -115,7 +115,7 @@
                     <i class="fa-solid fa-calendar-plus text-white mr-1.5"></i> Reservar Cita
                 </button>
                 <button id="tab-my-appointments" onclick="switchTab('my-appointments')" class="flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Mis Citas (<span id="my-citas-count">0</span>)
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5 text-white"></i> Mis Citas (<span id="my-citas-count">0</span>)
                 </button>
             </div>
 
@@ -186,87 +186,125 @@
         <!-- ========================================== -->
         <div id="view-admin" class="hidden space-y-6">
 
-            <!-- Admin Stats Bar -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
-                    <p class="text-[11px] text-gray-400 font-medium">Citas Hoy</p>
-                    <p class="text-xl font-bold text-white mt-0.5" id="stat-today-count">0</p>
-                    <span class="text-[10px] text-amber-400 font-semibold">Agendadas</span>
-                </div>
-                <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
-                    <p class="text-[11px] text-gray-400 font-medium">Total Citas</p>
-                    <p class="text-xl font-bold text-white mt-0.5" id="stat-total-count">0</p>
-                    <span class="text-[10px] text-emerald-400 font-semibold">En Sistema</span>
-                </div>
-                <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
-                    <p class="text-[11px] text-gray-400 font-medium">Caja Estimada</p>
-                    <p class="text-xl font-bold text-amber-400 mt-0.5" id="stat-revenue">0€</p>
-                    <span class="text-[10px] text-gray-400 font-semibold">Total día</span>
-                </div>
-            </div>
-
-            <!-- Admin Filter & Date Selection -->
-            <div class="bg-darkcard border border-darkborder rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
-                <div class="w-full sm:w-auto flex-1">
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Filtrar Fecha</label>
-                    <input type="date" id="admin-date-filter" onchange="renderAdminAppointments()" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
-                </div>
-                <div class="w-full sm:w-auto flex-1">
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Filtrar Peluquero</label>
-                    <select id="admin-barber-filter" onchange="renderAdminAppointments()" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
-                        <option value="all">Todos los profesionales</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Panel de Bloqueo de Horarios Flexible (Selección Múltiple) -->
-            <div class="bg-darkcard border border-amber-500/20 rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
-                        <i class="fa-solid fa-ban mr-1.5 text-amber-500"></i> Bloquear Horarios Específicos
-                    </h3>
-                    <button type="button" onclick="toggleSelectAllBlockHours()" class="text-[11px] text-amber-400 hover:underline">Seleccionar Todas</button>
-                </div>
-
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] text-gray-400 mb-1">Fecha a bloquear</label>
-                        <input type="date" id="admin-block-date" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] text-gray-400 mb-1.5">Selecciona una o varias horas:</label>
-                        <div id="admin-block-hours-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                            <!-- Inyectado dinámicamente con checkboxes -->
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="blockSchedule()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-lock"></i>
-                    <span>Bloquear Horas Seleccionadas</span>
+            <!-- Admin Sub-navigation Tabs -->
+            <div class="flex bg-darkcard p-1 rounded-xl border border-darkborder text-sm">
+                <button id="admin-tab-agenda" onclick="switchAdminTab('agenda')" class="flex-1 py-2.5 rounded-lg font-semibold text-center transition bg-amber-500 text-white shadow">
+                    <i class="fa-solid fa-calendar-days mr-1.5"></i> Agenda y Bloqueos
+                </button>
+                <button id="admin-tab-clients" onclick="switchAdminTab('clients')" class="flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-users mr-1.5"></i> Clientes VIP
                 </button>
             </div>
 
-            <!-- Agenda Info Box -->
-            <div id="cloud-notice-box" class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
-                <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-white shrink-0 mt-0.5">
-                    <i id="cloud-notice-icon" class="fa-solid fa-cloud text-lg text-amber-400"></i>
+            <!-- ADMIN SUBVIEW 1: AGENDA -->
+            <div id="admin-subview-agenda" class="space-y-6">
+                <!-- Admin Stats Bar -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
+                        <p class="text-[11px] text-gray-400 font-medium">Citas Hoy</p>
+                        <p class="text-xl font-bold text-white mt-0.5" id="stat-today-count">0</p>
+                        <span class="text-[10px] text-amber-400 font-semibold">Agendadas</span>
+                    </div>
+                    <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
+                        <p class="text-[11px] text-gray-400 font-medium">Caja Estimada</p>
+                        <p class="text-xl font-bold text-amber-400 mt-0.5" id="stat-revenue">0€</p>
+                        <span class="text-[10px] text-gray-400 font-semibold">Total día</span>
+                    </div>
+                    <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
+                        <p class="text-[11px] text-gray-400 font-medium">Ocupación</p>
+                        <p class="text-xl font-bold text-emerald-400 mt-0.5" id="stat-occupancy">0%</p>
+                        <span class="text-[10px] text-emerald-400 font-semibold">Jornada</span>
+                    </div>
                 </div>
-                <div class="text-xs text-gray-300 leading-relaxed">
-                    <strong id="cloud-notice-title" class="text-amber-400 font-semibold block text-sm mb-0.5">Gestión Directa de Citas</strong>
-                    <span id="cloud-notice-text">Todas las reservas realizadas por los clientes se registran automáticamente en esta agenda.</span>
+
+                <!-- Progress bar for occupancy -->
+                <div class="bg-darkcard border border-darkborder rounded-2xl p-3.5 space-y-1.5">
+                    <div class="flex justify-between text-xs font-semibold">
+                        <span class="text-gray-400">Progreso de ocupación diaria</span>
+                        <span id="occupancy-text" class="text-amber-400">0 / 14 huecos</span>
+                    </div>
+                    <div class="w-full bg-darkbg h-2 rounded-full overflow-hidden border border-darkborder">
+                        <div id="occupancy-bar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <!-- Admin Filter & Date Selection -->
+                <div class="bg-darkcard border border-darkborder rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                    <div class="w-full sm:w-auto flex-1">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Filtrar Fecha</label>
+                        <input type="date" id="admin-date-filter" onchange="renderAdminAppointments()" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="w-full sm:w-auto flex-1">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Filtrar Peluquero</label>
+                        <select id="admin-barber-filter" onchange="renderAdminAppointments()" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
+                            <option value="all">Todos los profesionales</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Panel de Bloqueo de Horarios Flexible (Selección Múltiple) -->
+                <div class="bg-darkcard border border-amber-500/20 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                            <i class="fa-solid fa-ban mr-1.5 text-amber-500"></i> Bloquear Horarios Específicos
+                        </h3>
+                        <button type="button" onclick="toggleSelectAllBlockHours()" class="text-[11px] text-amber-400 hover:underline">Seleccionar Todas</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">Fecha a bloquear</label>
+                            <input type="date" id="admin-block-date" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1.5">Selecciona una o varias horas:</label>
+                            <div id="admin-block-hours-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                <!-- Inyectado dinámicamente con checkboxes -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="blockSchedule()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Bloquear Horas Seleccionadas</span>
+                    </button>
+                </div>
+
+                <!-- Agenda Info Box -->
+                <div id="cloud-notice-box" class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-2xl flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-white shrink-0 mt-0.5">
+                        <i id="cloud-notice-icon" class="fa-solid fa-cloud text-lg text-amber-400"></i>
+                    </div>
+                    <div class="text-xs text-gray-300 leading-relaxed">
+                        <strong id="cloud-notice-title" class="text-amber-400 font-semibold block text-sm mb-0.5">Gestión Directa de Citas</strong>
+                        <span id="cloud-notice-text">Todas las reservas realizadas por los clientes se registran automáticamente en esta agenda.</span>
+                    </div>
+                </div>
+
+                <!-- Appointments List for Admin -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">Agenda del día</h3>
+                        <span class="text-xs text-gray-400" id="admin-agenda-subtitle">Citas</span>
+                    </div>
+
+                    <div id="admin-appointments-list" class="space-y-3">
+                        <!-- Rendered dynamically -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Appointments List for Admin -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">Agenda del día</h3>
-                    <span class="text-xs text-gray-400" id="admin-agenda-subtitle">Citas</span>
+            <!-- ADMIN SUBVIEW 2: CLIENTS / VIP HISTORY -->
+            <div id="admin-subview-clients" class="hidden space-y-4">
+                <div class="bg-darkcard border border-darkborder rounded-2xl p-4 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                        <i class="fa-solid fa-address-book mr-1.5 text-amber-500"></i> Directorio de Clientes Frecuentes
+                    </h3>
+                    <input type="text" id="client-search-input" oninput="renderClientsDirectory()" placeholder="Buscar por nombre o teléfono..." class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
                 </div>
 
-                <div id="admin-appointments-list" class="space-y-3">
+                <div id="clients-directory-list" class="space-y-3">
                     <!-- Rendered dynamically -->
                 </div>
             </div>
@@ -438,6 +476,7 @@
                     window.saveLocalBackup();
                     window.renderMyAppointments();
                     window.renderAdminAppointments();
+                    window.renderClientsDirectory();
                     window.updateTimeSlots();
                 }, (error) => {
                     console.warn("Error en la conexión a la nube:", error);
@@ -503,6 +542,7 @@
         let currentUser = null;
         let currentMode = 'client';
         let currentTab = 'book';
+        let currentAdminTab = 'agenda';
         let lastCreatedAppointment = null;
         
         let bookingSelection = {
@@ -580,6 +620,7 @@
 
             renderMyAppointments();
             renderAdminAppointments();
+            renderClientsDirectory();
         });
 
         function renderServices() {
@@ -723,18 +764,18 @@
 
             renderMyAppointments();
             renderAdminAppointments();
+            renderClientsDirectory();
             updateTimeSlots();
         }
 
-        function sendWhatsAppReminder(apt) {
-            const service = SERVICES.find(s => s.id === apt.serviceId) || { name: 'Servicio' };
-            const text = `Hola ${apt.clientName}, tu cita en Gravity Salón para ${service.name} el día ${formatDateReadable(apt.date)} a las ${apt.time} h ha sido confirmada. ¡Te esperamos!`;
-            const phone = apt.clientPhone.replace(/\s+/g, '');
-            const waUrl = `https://wa.me/34${phone}?text=${encodeURIComponent(text)}`;
-            console.log("WhatsApp URL generado:", waUrl);
-        }
+        // Enviar aviso por WhatsApp directo
+        window.sendWhatsAppMessage = function(phone, name, serviceName, dateStr, timeStr) {
+            const cleanPhone = phone.replace(/\s+/g, '');
+            const text = `Hola ${name}, te recordamos tu cita en Gravity Salón para el servicio de ${serviceName} el día ${formatDateReadable(dateStr)} a las ${timeStr} h. ¡Te esperamos!`;
+            window.open(`https://wa.me/34${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+        };
 
-        // Renderizar la rejilla de horas para bloquear de forma múltiple
+        // Renderizar rejilla para bloquear horas
         function renderAdminBlockHoursGrid() {
             const container = document.getElementById('admin-block-hours-grid');
             if (!container) return;
@@ -753,7 +794,6 @@
             checkboxes.forEach(chk => chk.checked = !allChecked);
         }
 
-        // Bloquear una o varias horas seleccionadas
         window.blockSchedule = function() {
             const date = document.getElementById('admin-block-date').value;
             const barberId = document.getElementById('admin-barber-filter').value;
@@ -793,7 +833,6 @@
             updateTimeSlots();
             showToast("Horarios bloqueados correctamente", "success");
 
-            // Limpiar selección
             document.querySelectorAll('input[name="block-hour-chk"]').forEach(chk => chk.checked = false);
         };
 
@@ -814,9 +853,7 @@
             
             if (lastCreatedAppointment) {
                 const service = SERVICES.find(s => s.id === lastCreatedAppointment.serviceId) || { name: 'Servicio' };
-                const text = `Hola ${lastCreatedAppointment.clientName}, tu cita en Gravity Salón para ${service.name} el día ${formatDateReadable(lastCreatedAppointment.date)} a las ${lastCreatedAppointment.time} h ha sido confirmada. ¡Te esperamos!`;
-                const phone = lastCreatedAppointment.clientPhone.replace(/\s+/g, '');
-                window.open(`https://wa.me/34${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                sendWhatsAppMessage(lastCreatedAppointment.clientPhone, lastCreatedAppointment.clientName, service.name, lastCreatedAppointment.date, lastCreatedAppointment.time);
             }
 
             showToast("¡Cita confirmada y registrada!", "success");
@@ -898,6 +935,7 @@
             showToast("Registro eliminado correctamente", "info");
             renderMyAppointments();
             renderAdminAppointments();
+            renderClientsDirectory();
             updateTimeSlots();
         }
 
@@ -929,6 +967,14 @@
                 return acc + (s ? s.price : 0);
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
+
+            // Calcular Ocupación (basada en TIME_SLOTS totales que son 14)
+            const totalSlotsCount = TIME_SLOTS.length;
+            const occupiedSlotsCount = todayAppointments.length;
+            const occupancyPct = Math.min(100, Math.round((occupiedSlotsCount / totalSlotsCount) * 100));
+            document.getElementById('stat-occupancy').innerText = `${occupancyPct}%`;
+            document.getElementById('occupancy-text').innerText = `${occupiedSlotsCount} / ${totalSlotsCount} huecos ocupados`;
+            document.getElementById('occupancy-bar').style.width = `${occupancyPct}%`;
 
             document.getElementById('admin-agenda-subtitle').innerText = `${filtered.length} elemento(s) para el ${formatDateReadable(dateFilter)}`;
 
@@ -985,13 +1031,77 @@
                         </div>
 
                         <div class="flex items-center space-x-2 w-full sm:w-auto">
-                            <button onclick="cancelAppointment('${apt.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition" title="Eliminar Cita">
+                            <button onclick="sendWhatsAppMessage('${apt.clientPhone}', '${apt.clientName}', '${service.name}', '${apt.date}', '${apt.time}')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 p-2.5 rounded-xl text-xs font-semibold transition" title="Enviar WhatsApp">
+                                <i class="fa-brands fa-whatsapp text-sm"></i>
+                            </button>
+                            <button onclick="cancelAppointment('${apt.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition flex-1 sm:flex-none justify-center flex items-center" title="Cancelar Cita">
                                 <i class="fa-solid fa-trash mr-1"></i> Cancelar Cita
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        // Renderizar Directorio de Clientes (Clientes VIP)
+        function renderClientsDirectory() {
+            const container = document.getElementById('clients-directory-list');
+            const searchVal = document.getElementById('client-search-input') ? document.getElementById('client-search-input').value.toLowerCase() : '';
+
+            // Agrupar citas por teléfono de cliente
+            const clientsMap = {};
+            window.appointments.filter(a => a.status !== 'blocked').forEach(apt => {
+                if (!clientsMap[apt.clientPhone]) {
+                    clientsMap[apt.clientPhone] = {
+                        name: apt.clientName,
+                        phone: apt.clientPhone,
+                        totalVisits: 0,
+                        totalSpent: 0,
+                        lastDate: apt.date
+                    };
+                }
+                clientsMap[apt.clientPhone].totalVisits++;
+                const s = SERVICES.find(srv => srv.id === apt.serviceId);
+                clientsMap[apt.clientPhone].totalSpent += (s ? s.price : 0);
+                if (apt.date > clientsMap[apt.clientPhone].lastDate) {
+                    clientsMap[apt.clientPhone].lastDate = apt.date;
+                }
+            });
+
+            let clientsList = Object.values(clientsMap);
+            if (searchVal) {
+                clientsList = clientsList.filter(c => c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal));
+            }
+
+            if (clientsList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-darkcard border border-darkborder rounded-2xl">
+                        <i class="fa-solid fa-user-slash text-3xl text-white mb-2"></i>
+                        <p class="text-xs font-medium text-gray-400">No se encontraron clientes registrados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = clientsList.map(client => `
+                <div class="bg-darkcard border border-darkborder rounded-2xl p-4 flex items-center justify-between">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/30">
+                                ${client.name.charAt(0).toUpperCase()}
+                            </span>
+                            <h4 class="font-bold text-white text-sm">${client.name}</h4>
+                        </div>
+                        <p class="text-xs text-gray-400">
+                            <i class="fa-solid fa-phone text-gray-500 mr-1"></i> +34 ${client.phone} • Visitas: <strong class="text-amber-400">${client.totalVisits}</strong> • Total invertido: <strong class="text-emerald-400">${client.totalSpent}€</strong>
+                        </p>
+                    </div>
+                    <button onclick="sendWhatsAppMessage('${client.phone}', '${client.name}', 'tu servicio habitual', '${client.lastDate}', 'pronto')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-1.5">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span class="hidden sm:inline">Contactar</span>
+                    </button>
+                </div>
+            `).join('');
         }
 
         function openAuthModal() {
@@ -1058,6 +1168,7 @@
                 viewAdmin.classList.remove('hidden');
                 viewClient.classList.add('hidden');
                 renderAdminAppointments();
+                renderClientsDirectory();
             }
         }
 
@@ -1078,6 +1189,27 @@
                 tabBook.className = "flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white";
                 subviewMyApts.classList.remove('hidden');
                 subviewBook.classList.add('hidden');
+            }
+        }
+
+        function switchAdminTab(subTab) {
+            currentAdminTab = subTab;
+            const btnAgenda = document.getElementById('admin-tab-agenda');
+            const btnClients = document.getElementById('admin-tab-clients');
+            const subAgenda = document.getElementById('admin-subview-agenda');
+            const subClients = document.getElementById('admin-subview-clients');
+
+            if (subTab === 'agenda') {
+                btnAgenda.className = "flex-1 py-2.5 rounded-lg font-semibold text-center transition bg-amber-500 text-white shadow";
+                btnClients.className = "flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white";
+                subAgenda.classList.remove('hidden');
+                subClients.classList.add('hidden');
+            } else {
+                btnClients.className = "flex-1 py-2.5 rounded-lg font-semibold text-center transition bg-amber-500 text-white shadow";
+                btnAgenda.className = "flex-1 py-2.5 rounded-lg font-semibold text-center transition text-gray-400 hover:text-white";
+                subClients.classList.remove('hidden');
+                subAgenda.classList.add('hidden');
+                renderClientsDirectory();
             }
         }
 
