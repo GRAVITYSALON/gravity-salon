@@ -39,6 +39,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* FORZAR ICONO DE CALENDARIO BLANCO EN MODO OSCURO */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(100%);
+            cursor: pointer;
+            opacity: 0.9;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-white relative overflow-x-hidden">
@@ -152,7 +162,7 @@
                     
                     <div class="bg-darkcard border border-darkborder rounded-2xl p-4 space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Día de la cita</label>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">📅 Día de la cita</label>
                             <input type="date" id="booking-date" onchange="updateTimeSlots()" class="w-full bg-darkbg border border-darkborder rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 text-sm">
                         </div>
 
@@ -231,7 +241,7 @@
                 <!-- Admin Filter & Date Selection -->
                 <div class="bg-darkcard border border-darkborder rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
                     <div class="w-full sm:w-auto flex-1">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Filtrar Fecha</label>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">📅 Filtrar Fecha</label>
                         <input type="date" id="admin-date-filter" onchange="renderAdminAppointments()" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="w-full sm:w-auto flex-1">
@@ -253,7 +263,7 @@
 
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-[11px] text-gray-400 mb-1">Fecha a bloquear</label>
+                            <label class="block text-[11px] text-gray-400 mb-1">📅 Fecha a bloquear</label>
                             <input type="date" id="admin-block-date" class="w-full bg-darkbg border border-darkborder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
                         </div>
 
@@ -356,7 +366,7 @@
             </div>
 
             <div class="space-y-1">
-                <h3 class="text-xl font-bold text-white">¡Reserva Confirmada!</h3>
+                <h3 class="text-xl font-bold text-white">📅 ¡Reserva Confirmada!</h3>
                 <p class="text-xs text-gray-400">Tu cita ha sido agendada con éxito en el sistema de la barbería.</p>
             </div>
 
@@ -378,11 +388,11 @@
                     <strong class="text-white" id="success-barber-name">-</strong>
                 </div>
                 <div class="flex justify-between text-gray-400">
-                    <span>Fecha:</span>
+                    <span>📅 Fecha:</span>
                     <strong class="text-white" id="success-date">-</strong>
                 </div>
                 <div class="flex justify-between text-gray-400">
-                    <span>Hora:</span>
+                    <span>⏰ Hora:</span>
                     <strong class="text-amber-400 font-bold" id="success-time">-</strong>
                 </div>
                 <div class="flex justify-between text-gray-400 pt-1 border-t border-darkborder">
@@ -768,10 +778,10 @@
             updateTimeSlots();
         }
 
-        // Enviar aviso por WhatsApp directo
+        // Enviar aviso por WhatsApp directo con formato de calendario
         window.sendWhatsAppMessage = function(phone, name, serviceName, dateStr, timeStr) {
             const cleanPhone = phone.replace(/\s+/g, '');
-            const text = `Hola ${name}, te recordamos tu cita en Gravity Salón para el servicio de ${serviceName} el día ${formatDateReadable(dateStr)} a las ${timeStr} h. ¡Te esperamos!`;
+            const text = `📅 Hola ${name}, te recordamos tu cita en Gravity Salón para el servicio de *${serviceName}* el día *${formatDateReadable(dateStr)}* a las *${timeStr} h*. ¡Te esperamos!`;
             window.open(`https://wa.me/34${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
         };
 
@@ -906,11 +916,11 @@
                         <div class="bg-darkbg p-3 rounded-xl flex items-center justify-between text-xs text-gray-300">
                             <div class="flex items-center space-x-2">
                                 <i class="fa-regular fa-calendar text-white"></i>
-                                <span>${formatDateReadable(apt.date)}</span>
+                                <span>📅 ${formatDateReadable(apt.date)}</span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i class="fa-regular fa-clock text-amber-400"></i>
-                                <span class="font-bold text-white">${apt.time} h</span>
+                                <span class="font-bold text-white">⏰ ${apt.time} h</span>
                             </div>
                         </div>
 
@@ -968,7 +978,6 @@
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
 
-            // Calcular Ocupación (basada en TIME_SLOTS totales que son 14)
             const totalSlotsCount = TIME_SLOTS.length;
             const occupiedSlotsCount = todayAppointments.length;
             const occupancyPct = Math.min(100, Math.round((occupiedSlotsCount / totalSlotsCount) * 100));
@@ -1048,7 +1057,6 @@
             const container = document.getElementById('clients-directory-list');
             const searchVal = document.getElementById('client-search-input') ? document.getElementById('client-search-input').value.toLowerCase() : '';
 
-            // Agrupar citas por teléfono de cliente
             const clientsMap = {};
             window.appointments.filter(a => a.status !== 'blocked').forEach(apt => {
                 if (!clientsMap[apt.clientPhone]) {
