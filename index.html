@@ -55,13 +55,8 @@
 
     <!-- BACKGROUND WATERMARK & LOGO OVERLAY -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center select-none">
-        <!-- Ambient Radial Glow -->
         <div class="absolute w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-3xl opacity-70"></div>
-        
-        <!-- Full Logo Watermark -->
         <img src="logo.jpg" alt="Gravity Salon Logo Background" class="w-[85vw] max-w-[680px] opacity-[0.07] object-contain filter drop-shadow-[0_0_35px_rgba(217,119,6,0.3)] transition-all duration-700 hover:opacity-10" onerror="this.style.display='none'">
-        
-        <!-- Vignette & Contrast Overlay -->
         <div class="absolute inset-0 bg-gradient-to-b from-darkbg/80 via-transparent to-darkbg/95"></div>
     </div>
 
@@ -210,11 +205,16 @@
             <div id="admin-subview-agenda" class="space-y-6">
                 <!-- Admin Stats Bar -->
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
-                        <p class="text-[11px] text-gray-400 font-medium">Citas Hoy</p>
+                    <!-- Botón desplegable interactivo para "Citas Hoy" -->
+                    <div onclick="toggleTodayQuickDropdown()" class="bg-darkcard border border-darkborder p-3.5 rounded-2xl cursor-pointer hover:border-amber-500/50 transition relative">
+                        <p class="text-[11px] text-gray-400 font-medium flex items-center justify-between">
+                            <span>Citas Hoy</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-amber-400"></i>
+                        </p>
                         <p class="text-xl font-bold text-white mt-0.5" id="stat-today-count">0</p>
-                        <span class="text-[10px] text-amber-400 font-semibold">Agendadas</span>
+                        <span class="text-[10px] text-amber-400 font-semibold">Ver desplegable</span>
                     </div>
+
                     <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
                         <p class="text-[11px] text-gray-400 font-medium">Caja Estimada</p>
                         <p class="text-xl font-bold text-amber-400 mt-0.5" id="stat-revenue">0€</p>
@@ -224,6 +224,27 @@
                         <p class="text-[11px] text-gray-400 font-medium">Ocupación</p>
                         <p class="text-xl font-bold text-emerald-400 mt-0.5" id="stat-occupancy">0%</p>
                         <span class="text-[10px] text-emerald-400 font-semibold">Jornada</span>
+                    </div>
+                </div>
+
+                <!-- Desplegable rápido de citas de hoy (oculto por defecto) -->
+                <div id="today-quick-dropdown" class="hidden bg-darkcard border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-darkborder pb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">⚡ Citas de Hoy (Vista Rápida)</h4>
+                        <button onclick="toggleTodayQuickDropdown()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="today-quick-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
+                        <!-- Inyectado dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Desglose de ganancias por profesional -->
+                <div class="bg-darkcard border border-darkborder rounded-2xl p-4 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                        <i class="fa-solid fa-chart-pie mr-1.5 text-amber-500"></i> Rendimiento e Ingresos por Profesional (Hoy)
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="barber-revenue-breakdown">
+                        <!-- Inyectado dinámicamente -->
                     </div>
                 </div>
 
@@ -785,6 +806,41 @@
             window.open(`https://wa.me/34${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
         };
 
+        // Desplegable rápido de citas de hoy
+        function toggleTodayQuickDropdown() {
+            const dropdown = document.getElementById('today-quick-dropdown');
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                renderTodayQuickList();
+            }
+        }
+
+        function renderTodayQuickList() {
+            const container = document.getElementById('today-quick-list');
+            const todayApts = window.appointments.filter(a => a.date === getTodayFormatted() && a.status !== 'blocked');
+
+            if (todayApts.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">No hay citas agendadas para hoy.</p>`;
+                return;
+            }
+
+            container.innerHTML = todayApts.map(apt => {
+                const s = SERVICES.find(srv => srv.id === apt.serviceId) || { name: 'Servicio', price: 0 };
+                const b = BARBERS.find(bar => bar.id === apt.barberId) || { name: 'Peluquero' };
+                return `
+                    <div class="bg-darkbg border border-darkborder rounded-xl p-2.5 flex items-center justify-between text-xs">
+                        <div>
+                            <strong class="text-amber-400">${apt.time} h</strong> - <span class="text-white font-bold">${apt.clientName}</span>
+                            <div class="text-[10px] text-gray-400">${s.name} (${s.price}€) • ${b.name}</div>
+                        </div>
+                        <button onclick="sendWhatsAppMessage('${apt.clientPhone}', '${apt.clientName}', '${s.name}', '${apt.date}', '${apt.time}')" class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
         // Renderizar rejilla para bloquear horas
         function renderAdminBlockHoursGrid() {
             const container = document.getElementById('admin-block-hours-grid');
@@ -978,6 +1034,9 @@
             }, 0);
             document.getElementById('stat-revenue').innerText = `${todayRevenue}€`;
 
+            // Calcular y renderizar ganancias por profesional (hoy)
+            renderBarberRevenueBreakdown(todayAppointments);
+
             const totalSlotsCount = TIME_SLOTS.length;
             const occupiedSlotsCount = todayAppointments.length;
             const occupancyPct = Math.min(100, Math.round((occupiedSlotsCount / totalSlotsCount) * 100));
@@ -1050,6 +1109,35 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Función para calcular y renderizar ganancias individuales por barbero
+        function renderBarberRevenueBreakdown(todayApts) {
+            const container = document.getElementById('barber-revenue-breakdown');
+            if (!container) return;
+
+            const stats = {};
+            BARBERS.forEach(b => {
+                stats[b.id] = { name: b.name, count: 0, revenue: 0 };
+            });
+
+            todayApts.forEach(apt => {
+                if (stats[apt.barberId]) {
+                    stats[apt.barberId].count++;
+                    const s = SERVICES.find(srv => srv.id === apt.serviceId);
+                    stats[apt.barberId].revenue += (s ? s.price : 0);
+                }
+            });
+
+            container.innerHTML = Object.values(stats).map(st => `
+                <div class="bg-darkbg border border-darkborder rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-white text-xs">${st.name}</h4>
+                        <p class="text-[10px] text-gray-400">${st.count} servicio(s) hoy</p>
+                    </div>
+                    <span class="text-sm font-bold text-amber-400">${st.revenue}€</span>
+                </div>
+            `).join('');
         }
 
         // Renderizar Directorio de Clientes (Clientes VIP)
