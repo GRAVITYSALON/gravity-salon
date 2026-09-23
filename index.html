@@ -4,25 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gravity Salón - Reserva tu Cita</title>
-    <!-- Tailwind CSS para un diseño moderno y responsive -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-p-6">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden md:max-w-lg my-10 border border-gray-700">
+    <div class="max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden md:max-w-lg my-10 border border-gray-700 w-full mx-4">
         <!-- Cabecera -->
         <div class="bg-gradient-to-r from-purple-900 to-indigo-900 p-6 text-center">
             <h1 class="text-3xl font-extrabold tracking-wider text-white">GRAVITY SALÓN</h1>
-            <p class="text-sm text-purple-200 mt-1">Reserva tu cita previa</p>
+            <p class="text-sm text-purple-200 mt-1">Reserva tu cita con Alejandro</p>
         </div>
 
         <!-- Formulario de Reserva -->
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-5">
             
-            <!-- 1. Profesional (Fijo en Alejandro) -->
+            <!-- 1. Profesional (Fijo: Alejandro) -->
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Profesional</label>
                 <div class="bg-gray-700 p-3 rounded-lg border border-gray-600 flex items-center justify-between">
@@ -76,11 +76,16 @@
         </div>
     </div>
 
-    <!-- Script de lógica de Firebase y reservas -->
+    <!-- Script de lógica conectada a Firebase -->
     <script>
-        // Configuración de Firebase (asegúrate de mantener tus credenciales o las actuales)
+        // TODO: Reemplaza con tus credenciales originales de Firebase
         const firebaseConfig = {
-            // TUS CREDENCIALES DE FIREBASE AQUÍ
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "gravity-salon",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
         };
         
         if (!firebase.apps.length) {
@@ -88,16 +93,73 @@
         }
         const db = firebase.firestore();
 
-        // Lógica sencilla para manejar fechas, horas y guardar en Firestore directamente con 'Alejandro'
+        // Generar horas disponibles al cambiar la fecha y comprobar citas ocupadas en Firestore
+        const dateInput = document.getElementById('date');
+        const timeSelect = document.getElementById('time');
+
+        // Establecer fecha mínima a hoy
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+
+        dateInput.addEventListener('change', async () => {
+            const selectedDate = dateInput.value;
+            timeSelect.innerHTML = '<option value="">Cargando horas...</option>';
+            
+            if (!selectedDate) {
+                timeSelect.innerHTML = '<option value="">Selecciona una fecha primero</option>';
+                return;
+            }
+
+            // Horario base de trabajo de Alejandro (ej: de 10:00 a 14:00 y de 17:00 a 20:00 en franjas de 30 min)
+            const baseHours = [
+                "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+                "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+            ];
+
+            try {
+                // Consultar citas ya reservadas para Alejandro en esa fecha
+                const snapshot = await db.collection('appointments')
+                    .where('barber', '==', 'Alejandro')
+                    .where('date', '==', selectedDate)
+                    .get();
+
+                const bookedHours = [];
+                snapshot.forEach(doc => {
+                    bookedHours.push(doc.data().time);
+                });
+
+                // Filtrar las horas que ya están ocupadas
+                const availableHours = baseHours.filter(hour => !bookedHours.includes(hour));
+
+                timeSelect.innerHTML = '';
+                if (availableHours.length === 0) {
+                    timeSelect.innerHTML = '<option value="">No hay horas libres para este día</option>';
+                    return;
+                }
+
+                availableHours.forEach(hour => {
+                    const option = document.createElement('option');
+                    option.value = hour;
+                    option.textContent = hour;
+                    timeSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("Error al consultar las horas:", error);
+                timeSelect.innerHTML = '<option value="">Error al cargar horas</option>';
+            }
+        });
+
+        // Registrar la cita en Firestore
         document.getElementById('bookBtn').addEventListener('click', async () => {
             const name = document.getElementById('clientName').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
-            const date = document.getElementById('date').value;
-            const time = document.getElementById('time').value;
+            const date = dateInput.value;
+            const time = timeSelect.value;
             const statusDiv = document.getElementById('statusMessage');
 
             if (!name || !phone || !date || !time) {
-                statusDiv.textContent = "Por favor, completa todos los campos.";
+                statusDiv.textContent = "Por favor, completa todos los campos y selecciona una hora.";
                 statusDiv.className = "text-center text-sm mt-2 text-red-400";
                 statusDiv.classList.remove('hidden');
                 return;
@@ -118,9 +180,10 @@
                 statusDiv.className = "text-center text-sm mt-2 text-green-400";
                 statusDiv.classList.remove('hidden');
                 
-                // Limpiar formulario
+                // Limpiar formulario y actualizar horas disponibles
                 document.getElementById('clientName').value = '';
                 document.getElementById('clientPhone').value = '';
+                dateInput.dispatchEvent(new Event('change'));
             } catch (error) {
                 console.error("Error al guardar la cita:", error);
                 statusDiv.textContent = "Hubo un error al reservar. Inténtalo de nuevo.";
