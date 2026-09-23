@@ -78,13 +78,13 @@
             </div>
 
             <!-- LOGO OFICIAL GRANDE Y CENTRADO -->
-            <div class="flex items-center justify-center cursor-pointer group py-1" onclick="switchTab('book')">
-                <div class="py-2.5 px-6 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-2xl group-hover:border-neutral-600 transition-all">
-                    <svg viewBox="0 0 200 65" class="w-48 sm:w-56 h-auto select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50%" y="30" text-anchor="middle" fill="#ffffff" font-family="Lora, serif" font-size="20" font-weight="bold" letter-spacing="4">[GRAVITY]</text>
-                        <path d="M 62 42 L 72 42 L 138 42" stroke="#ffffff" stroke-width="1.5" />
-                        <path d="M 62 42 L 57 58" stroke="#ffffff" stroke-width="1.5" />
-                        <text x="50%" y="54" text-anchor="middle" fill="#e5e5e5" font-family="Lora, serif" font-size="12" font-style="italic" letter-spacing="3">SALÓN</text>
+            <div class="flex items-center justify-center cursor-pointer group py-2" onclick="switchTab('book')">
+                <div class="py-3 px-8 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-2xl group-hover:border-neutral-600 transition-all">
+                    <svg viewBox="0 0 220 70" class="w-60 sm:w-72 h-auto select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50%" y="32" text-anchor="middle" fill="#ffffff" font-family="Lora, serif" font-size="22" font-weight="bold" letter-spacing="4">[GRAVITY]</text>
+                        <path d="M 68 46 L 78 46 L 152 46" stroke="#ffffff" stroke-width="1.5" />
+                        <path d="M 68 46 L 62 62" stroke="#ffffff" stroke-width="1.5" />
+                        <text x="50%" y="58" text-anchor="middle" fill="#e5e5e5" font-family="Lora, serif" font-size="13" font-style="italic" letter-spacing="3">SALÓN</text>
                     </svg>
                 </div>
             </div>
@@ -128,8 +128,8 @@
 
             <!-- TAB 1: BOOKING WIZARD DIRECTO -->
             <div id="subview-book" class="space-y-6">
-                <!-- Servicio Único Informativo -->
-                <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center justify-between">
+                <!-- Servicio Único Informativo sin Precio y sin descripción -->
+                <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 flex items-center justify-between">
                     <div class="flex items-center space-x-3.5">
                         <div class="w-12 h-12 rounded-xl bg-white text-black flex items-center justify-center text-xl font-bold shadow-md">
                             <i class="fa-solid fa-scissors"></i>
@@ -137,10 +137,9 @@
                         <div>
                             <span class="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block">Servicio Exclusivo</span>
                             <h4 class="font-bold text-sm text-white">Corte Caballero</h4>
-                            <p class="text-xs text-neutral-400 mt-0.5">20 min • 10 € • Corte clásico / degradado + peinado</p>
+                            <p class="text-xs text-neutral-400 mt-0.5">15 min</p>
                         </div>
                     </div>
-                    <span class="text-xs font-bold text-white bg-black px-3.5 py-2 rounded-xl border border-neutral-800">10 €</span>
                 </div>
 
                 <!-- Date & Time Slot Selection -->
@@ -231,7 +230,7 @@
                 <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 space-y-2 shadow-lg">
                     <div class="flex justify-between text-xs font-semibold">
                         <span class="text-neutral-400">Progreso de ocupación diaria</span>
-                        <span id="occupancy-text" class="text-white">0 / 14 huecos</span>
+                        <span id="occupancy-text" class="text-white">0 / 24 huecos</span>
                     </div>
                     <div class="w-full bg-black h-2 rounded-full overflow-hidden border border-neutral-800">
                         <div id="occupancy-bar" class="bg-white h-full w-0 transition-all duration-500"></div>
@@ -263,7 +262,7 @@
 
                         <div>
                             <label class="block text-[11px] text-neutral-400 mb-1.5">Selecciona una o varias horas:</label>
-                            <div id="admin-block-hours-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                            <div id="admin-block-hours-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto no-scrollbar">
                                 <!-- Inyectado dinámicamente -->
                             </div>
                         </div>
@@ -353,15 +352,17 @@
                 <p class="text-xs text-neutral-400">Tu cita ha sido registrada con éxito en Gravity Salón.</p>
             </div>
 
-            <!-- Ticket details -->
+            <!-- Ticket details sin precio -->
             <div class="bg-black border border-neutral-800 rounded-xl p-4 text-left space-y-2.5 text-xs">
                 <div class="flex items-center justify-center mb-3 pb-3 border-b border-neutral-800">
-                    <svg viewBox="0 0 200 65" class="w-32 h-auto select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50%" y="30" text-anchor="middle" fill="#ffffff" font-family="Lora, serif" font-size="20" font-weight="bold" letter-spacing="4">[GRAVITY]</text>
-                        <path d="M 62 42 L 72 42 L 138 42" stroke="#ffffff" stroke-width="1.5" />
-                        <path d="M 62 42 L 57 58" stroke="#ffffff" stroke-width="1.5" />
-                        <text x="50%" y="54" text-anchor="middle" fill="#e5e5e5" font-family="Lora, serif" font-size="12" font-style="italic" letter-spacing="3">SALÓN</text>
-                    </svg>
+                    <div class="flex flex-col items-center leading-none">
+                        <span class="font-serif text-lg font-bold tracking-[0.25em] text-white">[GRAVITY]</span>
+                        <div class="w-full flex items-center justify-center my-1">
+                            <div class="h-[1px] bg-white w-12 mr-1"></div>
+                            <span class="font-serif text-[10px] tracking-[0.2em] italic text-neutral-300">SALÓN</span>
+                            <div class="h-[1px] bg-white w-12 ml-1"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex justify-between text-neutral-400">
                     <span>Cliente:</span>
@@ -495,19 +496,28 @@
     </script>
 
     <script>
-        // Catalog Data (Único servicio y peluquero implícitos)
+        // Catalog Data (Único servicio y un único peluquero implícito)
         const SERVICES = [
-            { id: 's1', name: 'Corte Caballero', duration: 20, price: 10, icon: 'fa-scissors', desc: 'Corte clásico o degradado + peinado' }
+            { id: 's1', name: 'Corte Caballero', duration: 15, icon: 'fa-scissors' }
         ];
 
         const BARBERS = [
-            { id: 'b2', name: 'Alejandro', role: 'Especialista Degradados' }
+            { id: 'b2', name: 'Barbero', role: 'Especialista' }
         ];
 
         const ADMIN_PIN = '2580';
         let adminUnlocked = sessionStorage.getItem('gravity_admin_unlocked') === 'true';
 
-        const TIME_SLOTS = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'];
+        // Horarios cada 15 minutos (Mañana y Tarde)
+        const TIME_SLOTS = [
+            '10:00', '10:15', '10:30', '10:45',
+            '11:00', '11:15', '11:30', '11:45',
+            '12:00', '12:15', '12:30', '12:45',
+            '16:00', '16:15', '16:30', '16:45',
+            '17:00', '17:15', '17:30', '17:45',
+            '18:00', '18:15', '18:30', '18:45',
+            '19:00', '19:15', '19:30', '19:45'
+        ];
 
         let currentUser = null;
         let currentMode = 'client';
