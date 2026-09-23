@@ -9,77 +9,103 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-gray-950 text-gray-100 font-sans min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden md:max-w-lg my-10 border border-gray-700 w-full mx-4">
+    <!-- Contenedor Principal -->
+    <div class="max-w-md mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden md:max-w-lg my-10 border border-gray-800 w-full mx-4">
+        
         <!-- Cabecera -->
-        <div class="bg-gradient-to-r from-purple-900 to-indigo-900 p-6 text-center">
+        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-gray-900 p-6 text-center relative">
+            <div class="absolute top-4 right-4 text-purple-300 text-xl">
+                <i class="fa-solid fa-scissors"></i>
+            </div>
             <h1 class="text-3xl font-extrabold tracking-wider text-white">GRAVITY SALÓN</h1>
-            <p class="text-sm text-purple-200 mt-1">Reserva tu cita con Alejandro</p>
+            <p class="text-sm text-purple-200 mt-1">Reserva tu cita previa online</p>
         </div>
 
         <!-- Formulario de Reserva -->
         <div class="p-6 space-y-5">
             
-            <!-- 1. Profesional (Fijo: Alejandro) -->
+            <!-- 1. Selección de Profesional -->
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Profesional</label>
-                <div class="bg-gray-700 p-3 rounded-lg border border-gray-600 flex items-center justify-between">
-                    <span class="font-semibold text-white">Alejandro</span>
-                    <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded-full">Barbero</span>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fa-solid fa-user-tie text-purple-400 mr-1"></i> Selecciona Profesional
+                </label>
+                <div class="grid grid-cols-2 gap-3" id="barberSelection">
+                    <button type="button" data-barber="Alejandro" class="barber-btn bg-purple-600 text-white p-3 rounded-xl border border-purple-500 font-semibold text-center transition-all shadow-md">
+                        Alejandro
+                    </button>
+                    <button type="button" data-barber="Juanmi" class="barber-btn bg-gray-800 text-gray-300 p-3 rounded-xl border border-gray-700 font-semibold text-center transition-all hover:bg-gray-700">
+                        Juanmi
+                    </button>
                 </div>
             </div>
 
-            <!-- 2. Servicio (Único y sin precio) -->
+            <!-- 2. Selección de Servicio -->
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Servicio</label>
-                <div class="bg-gray-700 p-3 rounded-lg border border-gray-600 flex items-center justify-between">
-                    <span class="text-white">Cita de Peluquería</span>
-                    <span class="text-xs text-gray-400 italic">Pago en el local</span>
-                </div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fa-solid fa-list-check text-purple-400 mr-1"></i> Servicio
+                </label>
+                <select id="serviceSelect" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    <option value="Corte de Pelo|12€">Corte de Pelo - 12€</option>
+                    <option value="Corte y Barba|15€">Corte y Barba - 15€</option>
+                    <option value="Barba|8€">Barba - 8€</option>
+                </select>
             </div>
 
             <!-- 3. Selector de Fecha -->
             <div>
-                <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Fecha</label>
-                <input type="date" id="date" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                <label for="date" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fa-solid fa-calendar-days text-purple-400 mr-1"></i> Fecha
+                </label>
+                <input type="date" id="date" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
             </div>
 
             <!-- 4. Selector de Hora -->
             <div>
-                <label for="time" class="block text-sm font-medium text-gray-300 mb-2">Hora disponible</label>
-                <select id="time" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                <label for="time" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fa-solid fa-clock text-purple-400 mr-1"></i> Hora disponible
+                </label>
+                <select id="time" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
                     <option value="">Selecciona una fecha primero</option>
                 </select>
             </div>
 
             <!-- 5. Datos del Cliente -->
-            <div class="space-y-4">
+            <div class="space-y-4 pt-2 border-t border-gray-800">
                 <div>
                     <label for="clientName" class="block text-sm font-medium text-gray-300 mb-1">Tu Nombre y Apellidos</label>
-                    <input type="text" id="clientName" placeholder="Ej. Juan Pérez" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    <input type="text" id="clientName" placeholder="Ej. Carlos Pérez" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="clientPhone" class="block text-sm font-medium text-gray-300 mb-1">Teléfono de contacto</label>
-                    <input type="tel" id="clientPhone" placeholder="Ej. 600123456" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    <input type="tel" id="clientPhone" placeholder="Ej. 600123456" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
                 </div>
             </div>
 
             <!-- Botón de Acción -->
-            <button id="bookBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-lg">
+            <button id="bookBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl transition duration-200 shadow-lg shadow-purple-900/30">
                 Confirmar Cita
             </button>
 
             <!-- Mensaje de Estado -->
-            <div id="statusMessage" class="text-center text-sm mt-2 hidden"></div>
+            <div id="statusMessage" class="text-center text-sm mt-3 hidden font-medium"></div>
         </div>
     </div>
 
-    <!-- Script de lógica conectada a Firebase -->
+    <!-- Pie de página -->
+    <footer class="text-center py-4 text-xs text-gray-500">
+        Gravity Salón &copy; 2026 - Todos los derechos reservados
+    </footer>
+
+    <!-- Script de lógica de Firebase y aplicación -->
     <script>
-        // TODO: Reemplaza con tus credenciales originales de Firebase
+        // Configuración de Firebase
         const firebaseConfig = {
+            // Inserta aquí tus credenciales originales de Firebase
             apiKey: "TU_API_KEY",
             authDomain: "TU_AUTH_DOMAIN",
             projectId: "gravity-salon",
@@ -93,7 +119,27 @@
         }
         const db = firebase.firestore();
 
-        // Generar horas disponibles al cambiar la fecha y comprobar citas ocupadas en Firestore
+        let selectedBarber = 'Alejandro';
+
+        // Lógica de selección de barbero
+        const barberButtons = document.querySelectorAll('.barber-btn');
+        barberButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                barberButtons.forEach(b => {
+                    b.classList.remove('bg-purple-600', 'border-purple-500', 'text-white');
+                    b.classList.add('bg-gray-800', 'border-gray-700', 'text-gray-300');
+                });
+                btn.classList.remove('bg-gray-800', 'border-gray-700', 'text-gray-300');
+                btn.classList.add('bg-purple-600', 'border-purple-500', 'text-white');
+                selectedBarber = btn.getAttribute('data-barber');
+                
+                // Si ya hay una fecha seleccionada, recargar las horas del nuevo barbero
+                if (dateInput.value) {
+                    dateInput.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
 
@@ -101,6 +147,7 @@
         const today = new Date().toISOString().split('T')[0];
         dateInput.min = today;
 
+        // Cargar horas disponibles basadas en Firestore
         dateInput.addEventListener('change', async () => {
             const selectedDate = dateInput.value;
             timeSelect.innerHTML = '<option value="">Cargando horas...</option>';
@@ -110,16 +157,14 @@
                 return;
             }
 
-            // Horario base de trabajo de Alejandro (ej: de 10:00 a 14:00 y de 17:00 a 20:00 en franjas de 30 min)
             const baseHours = [
                 "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
                 "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
             ];
 
             try {
-                // Consultar citas ya reservadas para Alejandro en esa fecha
                 const snapshot = await db.collection('appointments')
-                    .where('barber', '==', 'Alejandro')
+                    .where('barber', '==', selectedBarber)
                     .where('date', '==', selectedDate)
                     .get();
 
@@ -128,7 +173,6 @@
                     bookedHours.push(doc.data().time);
                 });
 
-                // Filtrar las horas que ya están ocupadas
                 const availableHours = baseHours.filter(hour => !bookedHours.includes(hour));
 
                 timeSelect.innerHTML = '';
@@ -145,30 +189,34 @@
                 });
 
             } catch (error) {
-                console.error("Error al consultar las horas:", error);
+                console.error("Error al consultar horas:", error);
                 timeSelect.innerHTML = '<option value="">Error al cargar horas</option>';
             }
         });
 
-        // Registrar la cita en Firestore
+        // Registrar la cita
         document.getElementById('bookBtn').addEventListener('click', async () => {
             const name = document.getElementById('clientName').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
             const date = dateInput.value;
             const time = timeSelect.value;
+            const serviceData = document.getElementById('serviceSelect').value.split('|');
+            const serviceName = serviceData[0];
+            const servicePrice = serviceData[1];
             const statusDiv = document.getElementById('statusMessage');
 
             if (!name || !phone || !date || !time) {
                 statusDiv.textContent = "Por favor, completa todos los campos y selecciona una hora.";
-                statusDiv.className = "text-center text-sm mt-2 text-red-400";
+                statusDiv.className = "text-center text-sm mt-3 text-red-400 font-medium";
                 statusDiv.classList.remove('hidden');
                 return;
             }
 
             try {
                 await db.collection('appointments').add({
-                    barber: 'Alejandro',
-                    service: 'Cita de Peluquería',
+                    barber: selectedBarber,
+                    service: serviceName,
+                    price: servicePrice,
                     clientName: name,
                     clientPhone: phone,
                     date: date,
@@ -177,17 +225,17 @@
                 });
 
                 statusDiv.textContent = "¡Cita reservada con éxito! Te esperamos en Gravity Salón.";
-                statusDiv.className = "text-center text-sm mt-2 text-green-400";
+                statusDiv.className = "text-center text-sm mt-3 text-green-400 font-medium";
                 statusDiv.classList.remove('hidden');
                 
-                // Limpiar formulario y actualizar horas disponibles
+                // Limpiar formulario y refrescar horas
                 document.getElementById('clientName').value = '';
                 document.getElementById('clientPhone').value = '';
                 dateInput.dispatchEvent(new Event('change'));
             } catch (error) {
                 console.error("Error al guardar la cita:", error);
                 statusDiv.textContent = "Hubo un error al reservar. Inténtalo de nuevo.";
-                statusDiv.className = "text-center text-sm mt-2 text-red-400";
+                statusDiv.className = "text-center text-sm mt-3 text-red-400 font-medium";
                 statusDiv.classList.remove('hidden');
             }
         });
