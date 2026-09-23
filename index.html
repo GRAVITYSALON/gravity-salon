@@ -10,7 +10,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:wght@500;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -30,6 +30,7 @@
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
                     }
                 }
             }
@@ -66,7 +67,7 @@
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('book')">
                 <img src="logo.jpg" alt="Gravity Salon" class="w-10 h-10 rounded-xl object-contain bg-black border border-amber-500/30 p-0.5 shadow-lg shadow-amber-500/20" onerror="this.onerror=null; this.src='https://placehold.co/100x100/121214/ffffff?text=GS'">
                 <div>
-                    <h1 class="font-bold text-base md:text-lg leading-none text-white tracking-wide">GRAVITY SALÓN</h1>
+                    <h1 class="font-serif font-semibold text-base md:text-lg leading-none text-white tracking-wide">GRAVITY SALÓN</h1>
                     <span class="text-[11px] text-amber-500 font-semibold tracking-wider uppercase">Peluquería & Barbería</span>
                 </div>
             </div>
@@ -106,7 +107,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-amber-400 font-semibold">¡Bienvenido!</p>
-                        <h2 class="text-base font-bold text-white" id="user-display-name">Cliente Invitado</h2>
+                        <h2 class="font-serif font-semibold text-base text-white" id="user-display-name">Cliente Invitado</h2>
                     </div>
                 </div>
                 <button onclick="openAuthModal()" class="text-xs bg-amber-500/20 border border-amber-500/40 text-amber-300 px-3 py-1.5 rounded-xl hover:bg-amber-500/30 transition font-medium">
@@ -143,7 +144,7 @@
                         <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 inline-flex items-center justify-center text-[10px] mr-2 border border-amber-500/30">2</span>
                         Elige tu Peluquero
                     </h3>
-                    <div class="grid grid-cols-3 gap-3" id="barbers-container">
+                    <div class="grid grid-cols-1 gap-3" id="barbers-container">
                         <!-- Rendered dynamically -->
                     </div>
                 </div>
@@ -204,7 +205,7 @@
             <!-- ADMIN SUBVIEW 1: AGENDA -->
             <div id="admin-subview-agenda" class="space-y-6">
                 <!-- Admin Stats Bar -->
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 gap-3">
                     <div onclick="toggleTodayQuickDropdown()" class="bg-darkcard border border-darkborder p-3.5 rounded-2xl cursor-pointer hover:border-amber-500/50 transition relative">
                         <p class="text-[11px] text-gray-400 font-medium flex items-center justify-between">
                             <span>Citas Día</span>
@@ -214,11 +215,6 @@
                         <span class="text-[10px] text-amber-400 font-semibold">Ver desplegable</span>
                     </div>
 
-                    <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
-                        <p class="text-[11px] text-gray-400 font-medium">Caja Estimada</p>
-                        <p class="text-xl font-bold text-amber-400 mt-0.5" id="stat-revenue">0€</p>
-                        <span class="text-[10px] text-gray-400 font-semibold">Total día</span>
-                    </div>
                     <div class="bg-darkcard border border-darkborder p-3.5 rounded-2xl">
                         <p class="text-[11px] text-gray-400 font-medium">Ocupación</p>
                         <p class="text-xl font-bold text-emerald-400 mt-0.5" id="stat-occupancy">0%</p>
@@ -233,16 +229,6 @@
                         <button onclick="toggleTodayQuickDropdown()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div id="today-quick-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
-                        <!-- Inyectado dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Desglose de ganancias y total de citas por profesional -->
-                <div class="bg-darkcard border border-darkborder rounded-2xl p-4 space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
-                        <i class="fa-solid fa-chart-pie mr-1.5 text-amber-500"></i> Rendimiento y Total de Citas por Profesional
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="barber-revenue-breakdown">
                         <!-- Inyectado dinámicamente -->
                     </div>
                 </div>
@@ -354,7 +340,7 @@
                 <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-xl font-bold mb-2 border border-amber-500/30">
                     <i class="fa-solid fa-user-check"></i>
                 </div>
-                <h3 class="text-lg font-bold text-white">Datos del Cliente</h3>
+                <h3 class="font-serif font-semibold text-lg text-white">Datos del Cliente</h3>
                 <p class="text-xs text-gray-400">Ingresa tus datos para realizar reservas</p>
             </div>
 
@@ -386,7 +372,7 @@
             </div>
 
             <div class="space-y-1">
-                <h3 class="text-xl font-bold text-white">📅 ¡Reserva Confirmada!</h3>
+                <h3 class="font-serif font-semibold text-xl text-white">📅 ¡Reserva Confirmada!</h3>
                 <p class="text-xs text-gray-400">Tu cita ha sido agendada con éxito en el sistema de la barbería.</p>
             </div>
 
@@ -414,10 +400,6 @@
                 <div class="flex justify-between text-gray-400">
                     <span>⏰ Hora:</span>
                     <strong class="text-amber-400 font-bold" id="success-time">-</strong>
-                </div>
-                <div class="flex justify-between text-gray-400 pt-1 border-t border-darkborder">
-                    <span>Precio total:</span>
-                    <strong class="text-amber-400 font-bold text-sm" id="success-price">0€</strong>
                 </div>
             </div>
 
@@ -556,16 +538,11 @@
     <script>
         // Catalog Data
         const SERVICES = [
-            { id: 's1', name: 'Corte Caballero', duration: 20, price: 10, icon: 'fa-scissors', desc: 'Corte clásico o degradado + peinado' },
-            { id: 's2', name: 'Corte Caballero + Barba', duration: 30, price: 13, icon: 'fa-user-ninja', desc: 'Corte completo con perfilado de barba' },
-            { id: 's3', name: 'Corte Caballero + Barba + Cejas', duration: 35, price: 15, icon: 'fa-crown', desc: 'El servicio completo más demandado' },
-            { id: 's4', name: 'Corte Infantil (Hasta 10 años)', duration: 20, price: 8, icon: 'fa-child', desc: 'Atención especial para los más pequeños' }
+            { id: 's1', name: 'Corte Caballero', duration: 20, price: 10, icon: 'fa-scissors', desc: 'Corte clásico o degradado + peinado' }
         ];
 
         const BARBERS = [
-            { id: 'b2', name: 'Alejandro', role: 'Especialista Degradados', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
-            { id: 'b1', name: 'Juanmi', role: 'Barbero Master', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
-            { id: 'b3', name: 'Indiferente', role: 'Cualquier profesional', img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150' }
+            { id: 'b2', name: 'Alejandro', role: 'Especialista Degradados' }
         ];
 
         // PIN de acceso a la agenda de peluqueros (modo Barbería)
@@ -583,7 +560,7 @@
         
         let bookingSelection = {
             serviceId: 's1',
-            barberId: 'b1',
+            barberId: 'b2',
             date: getTodayFormatted(),
             time: '11:00'
         };
@@ -681,9 +658,6 @@
                                 <p class="text-[11px] text-gray-400">${service.duration} min • ${service.desc}</p>
                             </div>
                         </div>
-                        <div class="text-right pl-2">
-                            <span class="text-sm font-bold text-amber-400">${service.price}€</span>
-                        </div>
                     </div>
                 `;
             }).join('');
@@ -704,8 +678,8 @@
                         ? 'bg-amber-500/10 border-amber-500 ring-1 ring-amber-500' 
                         : 'bg-darkcard border-darkborder hover:border-gray-700'
                     }">
-                        <div class="w-11 h-11 rounded-full mx-auto mb-1.5 overflow-hidden border-2 ${isSelected ? 'border-amber-500' : 'border-gray-700'}">
-                            <img src="${barber.img}" alt="${barber.name}" class="w-full h-full object-cover">
+                        <div class="w-11 h-11 rounded-full mx-auto mb-1.5 overflow-hidden border-2 ${isSelected ? 'border-amber-500' : 'border-gray-700'} bg-darkbg flex items-center justify-center text-amber-400 font-bold text-lg">
+                            ${barber.name.charAt(0).toUpperCase()}
                         </div>
                         <h4 class="font-bold text-xs text-white leading-tight">${barber.name}</h4>
                         <p class="text-[10px] text-gray-400 mt-0.5">${barber.role}</p>
@@ -867,7 +841,7 @@
                     <div class="bg-darkbg border border-darkborder rounded-xl p-2.5 flex items-center justify-between text-xs">
                         <div>
                             <strong class="text-amber-400">${apt.time} h</strong> - <span class="text-white font-bold">${apt.clientName}</span>
-                            <div class="text-[10px] text-gray-400">${s.name} (${s.price}€) • ${b.name}</div>
+                            <div class="text-[10px] text-gray-400">${s.name} • ${b.name}</div>
                         </div>
                         <button onclick="sendWhatsAppMessage('${apt.clientPhone}', '${apt.clientName}', '${s.name}', '${apt.date}', '${apt.time}')" class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg">
                             <i class="fa-brands fa-whatsapp"></i>
@@ -924,7 +898,7 @@
                     clientName: '🔒 HORARIO BLOQUEADO',
                     clientPhone: '000000000',
                     serviceId: 's1',
-                    barberId: barberId === 'all' ? 'b1' : barberId,
+                    barberId: barberId === 'all' ? 'b2' : barberId,
                     date: date,
                     time: timeSlot,
                     status: 'blocked'
@@ -950,7 +924,6 @@
             document.getElementById('success-barber-name').innerText = barber.name;
             document.getElementById('success-date').innerText = formatDateReadable(apt.date);
             document.getElementById('success-time').innerText = apt.time + ' h';
-            document.getElementById('success-price').innerText = service.price + '€';
 
             document.getElementById('modal-booking-success').classList.remove('hidden');
         }
@@ -1008,7 +981,6 @@
                                 <h4 class="font-bold text-white text-sm">${service.name}</h4>
                                 <p class="text-xs text-gray-400 mt-0.5">Atendido por: <strong class="text-gray-200">${barber.name}</strong></p>
                             </div>
-                            <span class="text-base font-bold text-amber-400">${service.price}€</span>
                         </div>
 
                         <div class="bg-darkbg p-3 rounded-xl flex items-center justify-between text-xs text-gray-300">
@@ -1069,13 +1041,6 @@
             // Actualizar total de citas del día seleccionado
             document.getElementById('stat-today-count').innerText = selectedDateAppointments.length;
 
-            // Actualizar caja estimada del día seleccionado
-            const revenue = selectedDateAppointments.reduce((acc, apt) => {
-                const s = SERVICES.find(srv => srv.id === apt.serviceId);
-                return acc + (s ? s.price : 0);
-            }, 0);
-            document.getElementById('stat-revenue').innerText = `${revenue}€`;
-
             // Actualizar ocupación basada en los huecos de la jornada
             const totalSlotsCount = TIME_SLOTS.length;
             const occupiedSlotsCount = selectedDateAppointments.length;
@@ -1089,9 +1054,6 @@
             if (dropdown && !dropdown.classList.contains('hidden')) {
                 renderTodayQuickList();
             }
-
-            // Renderizar desglose por profesional
-            renderBarberRevenueBreakdown(dateFilter);
 
             // Filtrar para la lista principal de la agenda
             let filtered = window.appointments.filter(a => a.date === dateFilter);
@@ -1146,7 +1108,7 @@
                                 <h4 class="font-bold text-white text-sm">${apt.clientName}</h4>
                             </div>
                             <p class="text-xs text-gray-400">
-                                <span class="text-amber-300 font-medium">${service.name}</span> (${service.price}€) • Peluquero: <strong class="text-gray-200">${barber.name}</strong>
+                                <span class="text-amber-300 font-medium">${service.name}</span> • Peluquero: <strong class="text-gray-200">${barber.name}</strong>
                             </p>
                             <p class="text-[11px] text-gray-400">
                                 <i class="fa-solid fa-phone text-gray-500 mr-1"></i> +34 ${apt.clientPhone}
@@ -1166,61 +1128,6 @@
             }).join('');
         }
 
-        function renderBarberRevenueBreakdown(selectedDate) {
-            const container = document.getElementById('barber-revenue-breakdown');
-            if (!container) return;
-
-            const dateApts = (window.appointments || []).filter(a => a.date === selectedDate && a.status !== 'blocked');
-
-            const stats = {};
-            BARBERS.forEach(b => {
-                stats[b.id] = { name: b.name, appointments: [], revenue: 0 };
-            });
-
-            dateApts.forEach(apt => {
-                if (stats[apt.barberId]) {
-                    stats[apt.barberId].appointments.push(apt);
-                    const s = SERVICES.find(srv => srv.id === apt.serviceId);
-                    stats[apt.barberId].revenue += (s ? s.price : 0);
-                }
-            });
-
-            container.innerHTML = Object.values(stats).map(st => `
-                <div class="bg-darkbg border border-darkborder rounded-xl p-3.5 space-y-2">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="font-bold text-white text-xs">${st.name}</h4>
-                            <p class="text-[10px] text-gray-400">Ingresos: <strong class="text-amber-400">${st.revenue}€</strong></p>
-                        </div>
-                        <button onclick="toggleBarberAppointmentsDropdown('${st.name}')" class="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition flex items-center space-x-1.5">
-                            <span>Total Citas (${st.appointments.length})</span>
-                            <i class="fa-solid fa-chevron-down text-[9px]"></i>
-                        </button>
-                    </div>
-
-                    <div id="barber-list-${st.name}" class="hidden space-y-1.5 pt-2 border-t border-darkborder max-h-48 overflow-y-auto no-scrollbar">
-                        ${st.appointments.length === 0 
-                            ? `<p class="text-[11px] text-gray-500 text-center py-1">Sin citas para este día</p>` 
-                            : st.appointments.map(apt => {
-                                const s = SERVICES.find(srv => srv.id === apt.serviceId) || { name: 'Servicio', price: 0 };
-                                return `
-                                    <div class="bg-darkcard p-2 rounded-lg text-[11px] flex justify-between items-center">
-                                        <div>
-                                            <span class="text-amber-400 font-bold">${apt.time} h</span> - <strong class="text-white">${apt.clientName}</strong>
-                                            <div class="text-[10px] text-gray-400">${s.name} (${s.price}€)</div>
-                                        </div>
-                                        <button onclick="sendWhatsAppMessage('${apt.clientPhone}', '${apt.clientName}', '${s.name}', '${apt.date}', '${apt.time}')" class="text-emerald-400 p-1">
-                                            <i class="fa-brands fa-whatsapp text-lg"></i>
-                                        </button>
-                                    </div>
-                                `;
-                            }).join('')
-                        }
-                    </div>
-                </div>
-            `).join('');
-        }
-
         function renderClientsDirectory() {
             const container = document.getElementById('clients-directory-list');
             const searchVal = document.getElementById('client-search-input') ? document.getElementById('client-search-input').value.toLowerCase() : '';
@@ -1232,13 +1139,10 @@
                         name: apt.clientName,
                         phone: apt.clientPhone,
                         totalVisits: 0,
-                        totalSpent: 0,
                         lastDate: apt.date
                     };
                 }
                 clientsMap[apt.clientPhone].totalVisits++;
-                const s = SERVICES.find(srv => srv.id === apt.serviceId);
-                clientsMap[apt.clientPhone].totalSpent += (s ? s.price : 0);
                 if (apt.date > clientsMap[apt.clientPhone].lastDate) {
                     clientsMap[apt.clientPhone].lastDate = apt.date;
                 }
@@ -1269,7 +1173,7 @@
                             <h4 class="font-bold text-white text-sm">${client.name}</h4>
                         </div>
                         <p class="text-xs text-gray-400">
-                            <i class="fa-solid fa-phone text-gray-500 mr-1"></i> +34 ${client.phone} • Visitas: <strong class="text-amber-400">${client.totalVisits}</strong> • Total invertido: <strong class="text-emerald-400">${client.totalSpent}€</strong>
+                            <i class="fa-solid fa-phone text-gray-500 mr-1"></i> +34 ${client.phone} • Visitas: <strong class="text-amber-400">${client.totalVisits}</strong>
                         </p>
                     </div>
                     <button onclick="sendWhatsAppMessage('${client.phone}', '${client.name}', 'tu servicio habitual', '${client.lastDate}', 'pronto')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-1.5">
